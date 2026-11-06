@@ -471,7 +471,7 @@ const DEFAULT_MODEL="gemini-3.8-flash";
 const KEY=()=>store.get("gkey","");
 const MODEL=()=>{const m=store.get("gmodel","");if(!m||/^gemini-(1|2)\./.test(m)){store.set("gmodel",DEFAULT_MODEL);return DEFAULT_MODEL}return m};
 let AI_PROG=null;
-async function callGemini(prompt,tier,useThinking,signal){
+async function callGemini(prompt,tier,useThinking,signal,onProg){
   const gen={temperature:tier==="complex"?0.85:0.6,responseMimeType:"application/json"};
   if(useThinking)gen.thinkingConfig={thinkingLevel:"low"};
   const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL())}:streamGenerateContent?alt=sse`,{method:"POST",signal,headers:{"Content-Type":"application/json","x-goog-api-key":KEY()},body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:gen})});
@@ -480,16 +480,16 @@ async function callGemini(prompt,tier,useThinking,signal){
   for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
     let i;while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
       if(!line.startsWith("data:"))continue;
-      try{const j=JSON.parse(line.slice(5));txt+=(j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||"").join("");AI_PROG&&AI_PROG(txt.length)}catch(e){}}}
+      try{const j=JSON.parse(line.slice(5));txt+=(j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||"").join("");(onProg||AI_PROG)&&(onProg||AI_PROG)(txt.length)}catch(e){}}}
   return txt;
 }
-async function askAI(prompt,tier){
+async function askAI(prompt,tier,onProg){
   if(!KEY()){const e=new Error("nokey");e.code="nokey";throw e}
   let useThinking=store.get("thinkOK",true),last;
   for(let i=0;i<4;i++){
     const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),120000);
     let txt;
-    try{txt=await callGemini(prompt,tier,useThinking,ctl.signal)}
+    try{txt=await callGemini(prompt,tier,useThinking,ctl.signal,onProg)}
     catch(e){
       clearTimeout(timer);
       if(e.name==="AbortError"){const err=new Error("Gemini took longer than 2 minutes. Try again, or pick fewer scenes.");err.code="slow";throw err}
@@ -566,41 +566,68 @@ function savedChars(){return store.get("chars",[])}
 function renderSaved(){const c=savedChars();$("#cpSaved").innerHTML=`<option value="">${c.length?"Saved characters…":"No saved characters"}</option>`+c.map((x,i)=>`<option value="${i}">${esc(x.name)}</option>`).join("")}
 $("#cpSaved").onchange=e=>{const c=savedChars()[e.target.value];if(c){$("#cpChar").value=c.look;$("#cpStyle").value=c.style}};
 $("#cpSave").onclick=()=>{const look=$("#cpChar").value.trim();if(!look)return;const name=look.split(/[,.]/)[0].slice(0,40);const c=savedChars().filter(x=>x.look!==look);c.unshift({name,look,style:$("#cpStyle").value});store.set("chars",c.slice(0,12));renderSaved();toast(t("saved"))};
-$("#cpGo").onclick=()=>runTool($("#cpGo"),$("#cpOut"),async()=>{
+$("#cpGo").onclick=async()=>{
+  const btn=$("#cpGo"),out=$("#cpOut");
   const n=+$("#cpScenes").value,lang=$("#cpLang").value,plat=$("#cpPlat").value,ar=/16:9/.test(plat)?"16:9":"9:16";
-  const d=await askAI(`You are a viral short-form video director and an expert prompt writer for Google Flow (Veo video model) and Imagen.
-${trendContext()}
-
-TOPIC: ${$("#cpTopic").value}
+  const brief=`TOPIC: ${$("#cpTopic").value}
 PLATFORM: ${plat}, aspect ratio ${ar}
 CHARACTER (the creator's own words): ${$("#cpChar").value}
 VISUAL STYLE: ${$("#cpStyle").value}
-EXTRA DIRECTION: ${$("#cpExtra").value||"none"}
-SCENES: ${n}
-Hooks, dialogue and caption in ${lang}. Image and video prompts in English (the models follow English best), but dialogue lines inside them stay in ${lang}.
+EXTRA DIRECTION: ${$("#cpExtra").value||"none"}`;
+  const ctx=trendContext();
+  const box=(id,title)=>`<div class="card kv" id="${id}"><h2>${esc(title)}</h2><div class="loader" style="padding:8px 0"><div class="spin"></div><span class="small muted" data-prog>${esc(t("thinking"))}</span></div></div>`;
+  out.innerHTML=`<div class="grid g2">${box("cpHooks",t("hooks"))}${box("cpSheet",t("charSheet"))}</div>${box("cpImgs",t("imgPrompts"))}${box("cpScenesBox",t("flowScenes"))}`;
+  btn.disabled=true;const t0=Date.now();
+  const prog=id=>c=>{const el=$("#"+id+" [data-prog]");if(el)el.textContent=`Writing… ${c.toLocaleString()} characters · ${Math.round((Date.now()-t0)/1000)}s`};
+  const fail=(id,e)=>{const el=$("#"+id);if(el)el.innerHTML=aiError(e)};
+  const fill=(id,html)=>{const el=$("#"+id);if(el)el.innerHTML=html};
+  try{
+    const hooksP=askAI(`You are a viral short-form video director for a female US creator.
+${ctx}
+${brief}
+Write 8 hooks for the first 2 seconds in ${lang}, each a different type: curiosity gap, bold claim, POV, mistake/warning, relatable, number/list, challenge, story. Also a posting caption in ${lang} and 6 hashtags.
+Return ONLY JSON: {"hooks":[{"type":"","text":""}],"caption":"","hashtags":["#"]}`,"default",prog("cpHooks")).then(d=>{
+      const cap=(d.caption||"")+"\n\n"+(d.hashtags||[]).join(" ");
+      fill("cpHooks",`<div class="row" style="justify-content:space-between;margin-bottom:6px"><h2>${esc(t("hooks"))}</h2><button class="btn ghost sm" data-copy="${esc((d.hooks||[]).map(h=>h.text).join("\n"))}">${esc(t("copyAll"))}</button></div>
+      ${(d.hooks||[]).map(h=>`<div class="hook"><span class="k">${esc(h.type)}</span><span class="txt">${esc(h.text)}</span><button class="btn ghost sm" data-copy="${esc(h.text)}">${esc(t("copy"))}</button></div>`).join("")}
+      <div class="out" style="margin-top:12px">${esc(cap)}${copyBtn(cap)}</div>`);
+    }).catch(e=>fail("cpHooks",e));
 
-Make:
-1) 8 hooks for the first 2 seconds, each a different type: curiosity gap, bold claim, POV, mistake/warning, relatable, number/list, challenge, story.
-2) characterSheet: ONE locked paragraph of 55-80 words with fixed details (age, skin tone, face, hair, makeup, outfit, accessories, body language). Keep everything the creator wrote; only add details that make it more specific.
-3) imagePrompts: 4 prompts for consistent reference images to use as Flow Ingredients: front portrait on a neutral background, three-quarter view, full-body outfit, and the main location with no people. Each states style, lens, lighting and ${ar}.
-4) scenes: ${n} Veo prompts of about 8 seconds each. Inside each prompt, in this order: shot type + camera movement; the characterSheet copied word for word; the action beat by beat; setting + time of day; lighting; style/film look; audio (ambience + sound effects); dialogue written as She says: "..." (max 18 words). End every prompt with: No subtitles, no on-screen text, no watermark. Scene 1 delivers the hook in the first second. The last scene ends on a question for comments or loops back to scene 1.
-5) negative: short comma list of things to avoid.
-6) caption + 6 hashtags for posting.
-Return ONLY JSON: {"hooks":[{"type":"","text":""}],"characterSheet":"","imagePrompts":[{"name":"","prompt":""}],"scenes":[{"title":"","camera":"","dialogue":"","prompt":""}],"negative":"","caption":"","hashtags":["#"]}`,"complex");
-  const allScenes=(d.scenes||[]).map((s,i)=>`SCENE ${i+1} — ${s.title}\n${s.prompt}`).join("\n\n");
-  const cap=(d.caption||"")+"\n\n"+(d.hashtags||[]).join(" ");
-  $("#cpOut").innerHTML=`<div class="grid g2">
-   <div class="card"><div class="row" style="justify-content:space-between;margin-bottom:6px"><h2>${esc(t("hooks"))}</h2><button class="btn ghost sm" data-copy="${esc((d.hooks||[]).map(h=>h.text).join("\n"))}">${esc(t("copyAll"))}</button></div>
-     ${(d.hooks||[]).map(h=>`<div class="hook"><span class="k">${esc(h.type)}</span><span class="txt">${esc(h.text)}</span><button class="btn ghost sm" data-copy="${esc(h.text)}">${esc(t("copy"))}</button></div>`).join("")}</div>
-   <div class="card kv"><h2>${esc(t("charSheet"))}</h2><div class="out code">${esc(d.characterSheet)}${copyBtn(d.characterSheet)}</div>
-     <h2>${esc(t("negative"))}</h2><div class="out code">${esc(d.negative)}${copyBtn(d.negative)}</div>
-     <div class="out">${esc(cap)}${copyBtn(cap)}</div></div>
-  </div>
-  <div class="card kv"><h2>${esc(t("imgPrompts"))}</h2><div class="grid g2">${(d.imagePrompts||[]).map(p=>`<div class="kv"><span class="eyebrow">${esc(p.name)}</span><div class="out code">${esc(p.prompt)}${copyBtn(p.prompt)}</div></div>`).join("")}</div></div>
-  <div class="card kv"><div class="row" style="justify-content:space-between"><h2>${esc(t("flowScenes"))}</h2><button class="btn sm" data-copy="${esc(allScenes)}">${esc(t("copyAll"))}</button></div>
-   ${(d.scenes||[]).map((s,i)=>`<div class="scene"><div class="row" style="justify-content:space-between"><span class="num">SCENE ${i+1} · ~8s · ${esc(s.title)}</span><span class="pill">${esc(s.camera)}</span></div>
-   ${s.dialogue?`<div class="angle">“${esc(s.dialogue)}”</div>`:""}<div class="out code">${esc(s.prompt)}${copyBtn(s.prompt)}</div></div>`).join("")}</div>`;
-});
+    let sheet;
+    try{
+      const d=await askAI(`Write a locked character sheet for Google Flow (Veo) video prompts.
+CHARACTER (the creator's own words): ${$("#cpChar").value}
+VISUAL STYLE: ${$("#cpStyle").value}
+ONE paragraph of 55-80 words in English with fixed details: age, skin tone, face, hair, makeup, outfit, accessories, body language. Keep everything the creator wrote; only add details that make it more specific. Also a short comma list of things to avoid in the video.
+Return ONLY JSON: {"characterSheet":"","negative":""}`,"default",prog("cpSheet"));
+      sheet=d.characterSheet||$("#cpChar").value;
+      fill("cpSheet",`<h2>${esc(t("charSheet"))}</h2><div class="out code">${esc(sheet)}${copyBtn(sheet)}</div><h2>${esc(t("negative"))}</h2><div class="out code">${esc(d.negative)}${copyBtn(d.negative||"")}</div>`);
+    }catch(e){fail("cpSheet",e);fail("cpImgs",e);fail("cpScenesBox",e);await hooksP;return}
+
+    const imgsP=askAI(`Write 4 image prompts in English for consistent reference images to use as Google Flow "Ingredients".
+CHARACTER SHEET (use word for word): ${sheet}
+VISUAL STYLE: ${$("#cpStyle").value}
+${brief}
+The 4 images: front portrait on a neutral background, three-quarter view, full-body outfit, and the main location with no people. Each states style, lens, lighting and ${ar}.
+Return ONLY JSON: {"imagePrompts":[{"name":"","prompt":""}]}`,"default",prog("cpImgs")).then(d=>{
+      fill("cpImgs",`<h2>${esc(t("imgPrompts"))}</h2><div class="grid g2">${(d.imagePrompts||[]).map(p=>`<div class="kv"><span class="eyebrow">${esc(p.name)}</span><div class="out code">${esc(p.prompt)}${copyBtn(p.prompt)}</div></div>`).join("")}</div>`);
+    }).catch(e=>fail("cpImgs",e));
+
+    const scenesP=askAI(`You are a viral short-form video director and an expert prompt writer for Google Flow (Veo).
+${ctx}
+${brief}
+CHARACTER SHEET (copy word for word into every prompt): ${sheet}
+Write ${n} Veo scene prompts of about 8 seconds each, in English, with dialogue in ${lang}. Inside each prompt, in this order: shot type + camera movement; the character sheet word for word; the action beat by beat; setting + time of day; lighting; style/film look; audio (ambience + sound effects); dialogue written as She says: "..." (max 18 words). End every prompt with: No subtitles, no on-screen text, no watermark. Scene 1 delivers a strong hook in the first second. The last scene ends on a question for comments or loops back to scene 1.
+Return ONLY JSON: {"scenes":[{"title":"","camera":"","dialogue":"","prompt":""}]}`,"complex",prog("cpScenesBox")).then(d=>{
+      const all=(d.scenes||[]).map((s,i)=>`SCENE ${i+1} — ${s.title}\n${s.prompt}`).join("\n\n");
+      fill("cpScenesBox",`<div class="row" style="justify-content:space-between"><h2>${esc(t("flowScenes"))}</h2><button class="btn sm" data-copy="${esc(all)}">${esc(t("copyAll"))}</button></div>
+      ${(d.scenes||[]).map((s,i)=>`<div class="scene"><div class="row" style="justify-content:space-between"><span class="num">SCENE ${i+1} · ~8s · ${esc(s.title)}</span><span class="pill">${esc(s.camera)}</span></div>
+      ${s.dialogue?`<div class="angle">“${esc(s.dialogue)}”</div>`:""}<div class="out code">${esc(s.prompt)}${copyBtn(s.prompt)}</div></div>`).join("")}`);
+    }).catch(e=>fail("cpScenesBox",e));
+
+    await Promise.all([hooksP,imgsP,scenesP]);
+  }finally{btn.disabled=false}
+};
 
 /* ---------- settings ---------- */
 $("#sKey").value=KEY();$("#sModel").value=MODEL();
