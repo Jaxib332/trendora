@@ -306,7 +306,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="card grid">
         <label class="f"><span data-i="uiLang">Language</span><select id="lang2"></select></label>
         <label class="f"><span>Gemini API key</span><input id="sKey" type="password" placeholder="AIza…" autocomplete="off"></label>
-        <label class="f"><span>Gemini model</span><input id="sModel" value="gemini-2.5-flash"></label>
+        <label class="f"><span>Gemini model</span><input id="sModel" value="gemini-3.8-flash"></label>
         <label class="f"><span data-i="defLang">Default output language</span><select id="sLang" class="olang"></select></label>
         <div><button class="btn" id="sSave"><span data-i="save">Save</span></button></div>
         <p class="small muted">Trends refresh automatically every morning at 9 AM Pakistan time. The tag checker, SEO generator and copilot use your own Gemini key, which stays in this browser and is sent only to Google. In Google Cloud, restrict the key to the Generative Language API and to this website.</p>
@@ -467,14 +467,18 @@ function trendContext(){
   "\nTRENDING SONGS: "+(FEED.songs||[]).map(s=>`${s.title} – ${s.artist}`).join("; ")+
   "\nTAGS IN USE: "+Object.entries(FEED.hashtags||{}).map(([p,a])=>p+": "+(a||[]).map(x=>x.tag).join(" ")).join(" | ");
 }
-const KEY=()=>store.get("gkey",""),MODEL=()=>store.get("gmodel","gemini-2.5-flash");
+const DEFAULT_MODEL="gemini-3.8-flash";
+const KEY=()=>store.get("gkey","");
+const MODEL=()=>{const m=store.get("gmodel","");if(!m||/^gemini-(1|2)\./.test(m)){store.set("gmodel",DEFAULT_MODEL);return DEFAULT_MODEL}return m};
 async function askAI(prompt,tier){
   if(!KEY()){const e=new Error("nokey");e.code="nokey";throw e}
   let last;
-  for(let i=0;i<2;i++){
+  for(let i=0;i<3;i++){
     let r,d;
     try{r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL())}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":KEY()},body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:tier==="complex"?0.85:0.6,responseMimeType:"application/json"}})});d=await r.json().catch(()=>({}))}
     catch(e){const err=new Error("Couldn't reach Google's Gemini API. Check your internet connection and try again.");err.code="net";throw err}
+    const sug=!r.ok&&/no longer available|not found|not supported/i.test(d.error?.message||"")&&((d.error.message.match(/use (?:models\/)?(gemini-[\w.-]+)/i)||[])[1]);
+    if(sug&&sug!==MODEL()){store.set("gmodel",sug);if($("#sModel"))$("#sModel").value=sug;continue}
     if(!r.ok){last=new Error(r.status===429?t("busy"):(r.status===400||r.status===403)?"Gemini rejected the key. Check it in Settings, or make a new one at aistudio.google.com/apikey.":(d.error?.message||"Gemini error "+r.status));last.code=r.status===400||r.status===403?"badkey":"api";if(r.status>=500||r.status===429){await new Promise(z=>setTimeout(z,2500));continue}throw last}
     const txt=(d.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
     try{return JSON.parse(txt.replace(/```json|```/g,"").trim())}catch(e){last=new Error("Gemini sent an answer that wasn't valid. Tap the button again.")}
@@ -573,7 +577,7 @@ Return ONLY JSON: {"hooks":[{"type":"","text":""}],"characterSheet":"","imagePro
 
 /* ---------- settings ---------- */
 $("#sKey").value=KEY();$("#sModel").value=MODEL();
-$("#sSave").onclick=()=>{store.set("gkey",$("#sKey").value.trim());store.set("gmodel",$("#sModel").value.trim()||"gemini-2.5-flash");S.outLang=$("#sLang").value;store.set("outLang",S.outLang);$$(".olang").forEach(s=>s.value=S.outLang);toast(t("saved"))};
+$("#sSave").onclick=()=>{store.set("gkey",$("#sKey").value.trim());store.set("gmodel",$("#sModel").value.trim()||DEFAULT_MODEL);S.outLang=$("#sLang").value;store.set("outLang",S.outLang);$$(".olang").forEach(s=>s.value=S.outLang);toast(t("saved"))};
 
 /* ---------- 3D gradient background ---------- */
 (function(){const c=$("#bgfx"),x=c.getContext("2d");let w,h;const dpr=Math.min(devicePixelRatio||1,2);
