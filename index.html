@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trendora</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Sans+Arabic:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: glass sidebar + content column over a live 3D gradient canvas; dark, holographic */
+:root{
+  --bg:#0c0913; --bg2:#15101f; --glass:rgba(255,255,255,.055); --glass-hi:rgba(255,255,255,.1);
+  --line:rgba(255,255,255,.1); --fg:#f7f2ff; --muted:#a99cbf; --dim:#6f6385;
+  --pink:#ff3d9a; --peach:#ff9a5a; --lime:#d4ff4f; --cyan:#4fe3ff; --violet:#9b6bff;
+  --good:#5cf2a0; --warn:#ffc24f; --bad:#ff5a6e;
+  --grad:linear-gradient(120deg,var(--pink),var(--peach) 45%,var(--lime));
+  --grad2:linear-gradient(135deg,var(--cyan),var(--violet) 55%,var(--pink));
+  --display:"Unbounded","Arial Rounded MT Bold",system-ui,sans-serif;
+  --body:"Figtree","Noto Sans Arabic","Noto Sans Devanagari",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --r:22px; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[dir=rtl] body,[dir=rtl] .app{font-family:"Noto Sans Arabic","Noto Nastaliq Urdu",var(--body)}
+#bgfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>")}
+.app{position:relative;z-index:2;display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+aside{position:sticky;top:env(safe-area-inset-top,0px);height:calc(100vh - env(safe-area-inset-top,0px));padding:24px 16px;border-inline-end:1px solid var(--line);background:rgba(12,9,19,.55);backdrop-filter:blur(22px);display:flex;flex-direction:column;gap:22px}
+.logo{display:flex;align-items:center;gap:10px;font:800 21px/1 var(--display);letter-spacing:-.02em}
+.orb{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff 0 6%,var(--lime) 18%,var(--pink) 52%,#5a1f7a 85%);box-shadow:0 0 22px rgba(255,61,154,.6),inset -4px -6px 10px rgba(0,0,0,.4);animation:spin 8s linear infinite}
+@keyframes spin{to{filter:hue-rotate(360deg)}}
+nav{display:flex;flex-direction:column;gap:4px}
+nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;color:var(--muted);font-weight:600;transition:.2s}
+nav button svg{width:19px;height:19px;flex:none}
+nav button:hover{color:var(--fg);background:var(--glass)}
+nav button.on{color:#16081a;background:var(--grad);box-shadow:0 8px 24px -8px rgba(255,61,154,.7)}
+nav button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--dim)}
+select,input,textarea{font:inherit;color:var(--fg);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:14px;padding:11px 14px;width:100%;outline:none;transition:border .2s,box-shadow .2s}
+textarea{min-height:96px;resize:vertical}
+select option{background:var(--bg2)}
+input:focus,textarea:focus,select:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(255,61,154,.2)}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:0}
+main{padding-block:28px 80px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px));min-width:0}
+.view{display:none;flex-direction:column;gap:22px;max-width:1180px;animation:rise .45s cubic-bezier(.2,.8,.2,1)}
+.view.on{display:flex}
+@keyframes rise{from{opacity:.4;transform:translateY(10px)}to{opacity:1;transform:none}}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px}
+h1{font:800 clamp(28px,4.4vw,52px)/1.02 var(--display);letter-spacing:-.035em;margin:0;text-wrap:balance}
+h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font:700 18px/1.2 var(--display);letter-spacing:-.01em;margin:0}
+.sub{color:var(--muted);margin:6px 0 0;max-width:62ch}
+.eyebrow{font:500 11.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--lime)}
+.btn{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:999px;font-weight:700;background:var(--grad);color:#1a0716;box-shadow:0 10px 30px -10px rgba(255,61,154,.8),inset 0 1px 0 rgba(255,255,255,.5);transition:transform .15s,filter .2s;white-space:nowrap}
+.btn:hover{transform:translateY(-2px);filter:saturate(1.2)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--glass);color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.sm{padding:7px 13px;font-size:13px}
+.btn:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.card{position:relative;background:linear-gradient(160deg,rgba(255,255,255,.085),rgba(255,255,255,.025));border:1px solid var(--line);border-radius:var(--r);padding:20px;backdrop-filter:blur(18px);min-width:0;transform-style:preserve-3d;transition:transform .25s ease,box-shadow .25s}
+.tilt:hover{box-shadow:0 30px 60px -30px rgba(255,61,154,.45)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.auto{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{all:unset;cursor:pointer;padding:8px 15px;border-radius:999px;font-weight:600;font-size:13.5px;color:var(--muted);background:var(--glass);border:1px solid var(--line)}
+.tab.on{color:var(--fg);border-color:transparent;background:linear-gradient(var(--bg2),var(--bg2)) padding-box,var(--grad) border-box;border:1px solid transparent}
+.status{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--good);box-shadow:0 0 12px var(--good)}
+.dot.demo{background:var(--warn);box-shadow:0 0 12px var(--warn)}
+.banner{border-radius:18px;padding:14px 18px;background:linear-gradient(90deg,rgba(255,194,79,.14),rgba(255,61,154,.1));border:1px solid rgba(255,194,79,.35);display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.topic{display:flex;flex-direction:column;gap:10px}
+.topic .t{font:700 17px/1.25 var(--display);letter-spacing:-.01em;text-wrap:balance}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font:600 11.5px var(--body);letter-spacing:.03em;background:var(--glass-hi);color:var(--fg);white-space:nowrap}
+.p-TikTok{background:rgba(79,227,255,.16);color:var(--cyan)}
+.p-Instagram,.p-Meta,.p-Facebook,.p-Threads{background:rgba(255,61,154,.16);color:#ff8cc2}
+.p-YouTube{background:rgba(255,90,110,.18);color:#ff8f9c}
+.p-Google{background:rgba(212,255,79,.15);color:var(--lime)}
+.heat{height:6px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
+.heat i{display:block;height:100%;border-radius:9px;background:var(--grad)}
+.angle{font-size:13.5px;color:var(--muted);border-inline-start:2px solid var(--pink);padding-inline-start:10px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{all:unset;cursor:pointer;font:500 12.5px var(--mono);padding:5px 10px;border-radius:10px;background:rgba(155,107,255,.14);color:#d6c4ff;transition:.15s}
+.tag:hover{background:rgba(155,107,255,.3)}
+.rank{font:800 40px/1 var(--display);background:var(--grad2);-webkit-background-clip:text;background-clip:text;color:transparent;min-width:52px}
+.list-item{display:flex;gap:16px;align-items:flex-start}
+.list-item>div{min-width:0;flex:1}
+.stat{font:500 12.5px var(--mono);color:var(--lime)}
+.muted{color:var(--muted)}.small{font-size:13px}
+.sources{display:flex;flex-wrap:wrap;gap:6px;font-size:12px}
+.sources a{color:var(--muted);text-decoration:none;padding:4px 9px;border-radius:8px;background:var(--glass);border:1px solid var(--line);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sources a:hover{color:var(--fg)}
+.loader{display:flex;align-items:center;gap:12px;color:var(--muted);padding:26px}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:var(--pink);animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.err{color:#ffb3bd;background:rgba(255,90,110,.12);border:1px solid rgba(255,90,110,.35);border-radius:14px;padding:12px 16px;font-size:14px}
+.score-ring{--v:0;width:132px;height:132px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--pink) 0,var(--peach) calc(var(--v)*.5%),var(--lime) calc(var(--v)*1%),rgba(255,255,255,.08) 0);flex:none}
+.score-ring b{display:grid;place-items:center;width:104px;height:104px;border-radius:50%;background:var(--bg2);font:800 34px var(--display)}
+.bar-row{display:grid;grid-template-columns:120px 1fr 40px;gap:10px;align-items:center;font-size:13.5px}
+.bar-row .heat{height:8px}
+.out{white-space:pre-wrap;word-break:break-word;font-size:14px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:14px;position:relative}
+.out.code{font:13px/1.6 var(--mono);color:#efe6ff}
+.copy{position:absolute;top:8px;inset-inline-end:8px}
+.hook{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.hook:last-child{border:0}
+.hook .k{font:600 10.5px var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--cyan);min-width:84px;padding-top:3px}
+.hook .txt{flex:1;min-width:0;font-weight:600}
+.scene{display:flex;flex-direction:column;gap:10px}
+.scene .num{font:800 13px var(--display);color:var(--lime)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{all:unset;cursor:pointer;padding:7px 12px;border-radius:999px;border:1px solid var(--line);font-size:13px;color:var(--muted)}
+.chip.on{color:#1a0716;background:var(--lime);border-color:var(--lime);font-weight:700}
+.toast{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(30px);opacity:0;background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;z-index:50;transition:.25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.hero-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.hero-stats .card{padding:16px}
+.hero-stats b{display:block;font:800 26px var(--display);background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.app-cat h2{font-size:15px;margin-bottom:10px}
+.app-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.app-row:last-child{border:0}
+.kv{display:flex;flex-direction:column;gap:12px}
+details{border:1px solid var(--line);border-radius:14px;padding:12px 16px;background:var(--glass)}
+summary{cursor:pointer;font-weight:700}
+.mob-head{display:none}
+@media (max-width:980px){.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:820px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  aside{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:20;flex-direction:column;gap:10px;padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border:0;border-bottom:1px solid var(--line)}
+  nav{flex-direction:row;overflow-x:auto;scrollbar-width:none;gap:6px}
+  nav::-webkit-scrollbar{display:none}
+  nav button{padding:8px 12px;white-space:nowrap;font-size:13.5px}
+  nav button svg{width:16px;height:16px}
+  .side-foot{display:none}
+  .logo-row{display:flex;justify-content:space-between;align-items:center}
+  .mob-head{display:flex;gap:8px}
+  .mob-head select{width:auto;padding:6px 10px;font-size:13px}
+  main{padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .g2,.g3{grid-template-columns:minmax(0,1fr)}
+  .bar-row{grid-template-columns:96px 1fr 34px}
+}
+.lbl{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:40px 20px}
+.empty h2{max-width:40ch;font-size:16px;line-height:1.4}
+.orb.big{width:72px;height:72px}
+.tagrow{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.tagrow .small{text-align:end;min-width:0}
+.ul{margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:6px}
+.scorecard{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.mono{font-family:var(--mono)}
+.fixbox{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.fixbox b{font-size:15px;color:var(--fg)}
+.pill.niche{background:linear-gradient(90deg,var(--lime),#5cf2a0);color:#0f1a05;font-weight:700}
+.tab.tab-niche{color:var(--lime);border-color:rgba(212,255,79,.4)}
+.tab.tab-niche.on{color:var(--fg)}
+.p-Fitness{background:rgba(212,255,79,.15);color:var(--lime)}
+.creator{display:grid;grid-template-columns:170px minmax(0,1fr);gap:22px;align-items:start}
+.cbody{min-width:0}
+.portrait{position:relative;aspect-ratio:4/5;border-radius:18px;overflow:hidden;background:radial-gradient(120% 80% at 30% 15%,rgba(255,255,255,.45),transparent 45%),conic-gradient(from 210deg at 50% 60%,hsl(var(--h) 90% 60%),hsl(calc(var(--h) + 70) 95% 60%),hsl(calc(var(--h) + 150) 85% 58%),hsl(var(--h) 90% 60%));box-shadow:0 18px 40px -18px hsl(var(--h) 90% 55%),inset 0 0 0 1px rgba(255,255,255,.18);transform:translateZ(20px)}
+.portrait .bust{position:absolute;inset:0;width:100%;height:100%;fill:rgba(16,7,26,.82)}
+.prank{position:absolute;top:10px;inset-inline-start:12px;font:800 26px/1 var(--display);color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.4)}
+.portrait .badge{position:absolute;inset-inline-end:10px;bottom:10px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.92);color:hsl(var(--h) 80% 38%)}
+.portrait .badge svg{width:18px;height:18px}
+@media (max-width:600px){.creator{grid-template-columns:minmax(0,1fr)}.portrait{aspect-ratio:auto;height:190px}}
+.avatar{position:relative;flex:none;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;overflow:visible;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.55) 0 8%,transparent 30%),conic-gradient(from 200deg,hsl(var(--h) 90% 62%),hsl(calc(var(--h) + 60) 95% 60%),hsl(calc(var(--h) + 140) 85% 58%),hsl(var(--h) 90% 62%));box-shadow:0 10px 26px -10px hsl(var(--h) 90% 55%),inset -6px -8px 14px rgba(0,0,0,.3)}
+.avatar .bust{width:100%;height:100%;border-radius:50%;fill:rgba(18,8,28,.78)}
+.avatar .badge{position:absolute;inset-inline-end:-4px;bottom:-4px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--bg2);border:2px solid hsl(var(--h) 90% 62%);color:hsl(var(--h) 95% 72%)}
+.avatar .badge svg{width:14px;height:14px}
+@media (max-width:520px){.list-item{flex-wrap:wrap}.avatar{width:52px;height:52px}}
+.accts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:14px}
+.acct{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:14px;text-decoration:none;color:inherit;border:1px solid var(--line);min-width:0;transition:transform .15s}
+.acct:hover{transform:translateY(-2px)}
+.acct-p{font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.acct-h{font-weight:700;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct-n{font:500 12.5px var(--mono);color:var(--lime)}
+.acct-n i{font-style:normal;color:var(--dim)}
+.flowlist{margin:10px 0 0;padding-inline-start:20px;display:flex;flex-direction:column;gap:6px}
+.out{padding-inline-end:84px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<canvas id="bgfx" aria-hidden="true"></canvas>
+<div class="grain"></div>
+<div class="app">
+  <aside>
+    <div class="logo-row">
+      <div class="logo"><span class="orb"></span>Trendora</div>
+      <div class="mob-head"><select id="langM" aria-label="Language"></select></div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="side-foot">
+      <label class="f"><span data-i="uiLang">Language</span><select id="lang"></select></label>
+      <div id="sideStatus" class="status"></div>
+    </div>
+  </aside>
+  <main>
+    <section class="view" id="v-today">
+      <div class="head">
+        <div>
+          <div class="eyebrow" id="todayDate">USA · TODAY</div>
+          <h1><span data-i="todayH1a">What America is</span> <span class="g" data-i="todayH1b">obsessed with today</span></h1>
+          <p class="sub" data-i="todaySub">Updated every morning at 9 AM Pakistan time from TikTok, Instagram, YouTube, Google and the US charts.</p>
+        </div>
+        <div id="topStatus" class="status"></div>
+      </div>
+      <div id="notice"></div>
+      <div class="hero-stats" id="heroStats"></div>
+      <div class="tabs" id="platTabs"></div>
+      <div id="topicsBox"></div>
+    </section>
+
+    <section class="view" id="v-tags">
+      <div class="head"><div><div class="eyebrow">USA · HASHTAGS</div><h1><span class="g" data-i="tagsH1">Hot tags</span></h1><p class="sub" data-i="tagsSub">Tags matched to today's trends, grouped by platform. Tap a tag to copy it.</p></div></div>
+      <div id="tagsBox" class="grid g2"></div>
+    </section>
+
+    <section class="view" id="v-creators">
+      <div class="head"><div><div class="eyebrow">USA · CREATORS</div><h1><span data-i="creH1a">Top 5</span> <span class="g" data-i="creH1b">creators right now</span></h1><p class="sub" data-i="creSub">US creators gaining the most followers this month, with their accounts on every platform. Each count shows the date its source recorded it.</p></div></div>
+      <div id="creatorsBox" class="grid"></div>
+    </section>
+
+    <section class="view" id="v-songs">
+      <div class="head"><div><div class="eyebrow">USA · AUDIO</div><h1><span data-i="songH1a">Top 5</span> <span class="g" data-i="songH1b">trending songs</span></h1><p class="sub" data-i="songSub">The sounds US creators are using now. Check the license before using a track in paid or branded content.</p></div></div>
+      <div id="songsBox" class="grid"></div>
+    </section>
+
+    <section class="view" id="v-apps">
+      <div class="head"><div><div class="eyebrow">USA · APP STORE</div><h1><span data-i="appsH1a">Trending apps</span> <span class="g" data-i="appsH1b">by category</span></h1><p class="sub" data-i="appsSub">From the US top free chart. CapCut is always left out.</p></div></div>
+      <div id="appsBox" class="grid g3"></div>
+    </section>
+
+    <section class="view" id="v-check">
+      <div class="head"><div><div class="eyebrow">AI SCORE</div><h1><span data-i="chkH1a">Rate my</span> <span class="g" data-i="chkH1b">title, caption & tags</span></h1><p class="sub" data-i="chkSub">Paste what you plan to post. The AI scores it against today's trends. The score is an AI estimate, not platform data.</p></div></div>
+      <div class="card grid">
+        <div class="grid g2">
+          <label class="f"><span data-i="platform">Platform</span><select id="ckPlat"><option>TikTok</option><option>Instagram Reels</option><option>YouTube Shorts</option><option>YouTube (long)</option><option>Facebook</option><option>Pinterest</option></select></label>
+          <label class="f"><span data-i="outLang">Output language</span><select id="ckLang" class="olang"></select></label>
+        </div>
+        <label class="f"><span data-i="title">Title / hook</span><input id="ckTitle" value="5 fall outfits under $50 that look expensive"></label>
+        <label class="f"><span data-i="desc">Description / caption</span><textarea id="ckDesc">Fall outfit ideas on a budget 🍂 which one is your fave? #fashion #outfit #fyp</textarea></label>
+        <label class="f"><span data-i="tags_">Hashtags / tags</span><input id="ckTags" value="#fashion #outfit #fyp #ootd"></label>
+        <div><button class="btn ai" id="ckGo"><span data-i="rateIt">Rate it</span></button></div>
+      </div>
+      <div id="ckOut"></div>
+    </section>
+
+    <section class="view" id="v-gen">
+      <div class="head"><div><div class="eyebrow">SEO PACK</div><h1><span data-i="genH1a">Topic to</span> <span class="g" data-i="genH1b">title + caption + tags</span></h1><p class="sub" data-i="genSub">Written for each platform's own search, using today's trends.</p></div></div>
+      <div class="card grid">
+        <label class="f"><span data-i="topic">Topic</span><input id="gTopic" value="Glass skin morning routine"></label>
+        <div class="grid g3">
+          <label class="f"><span data-i="niche">Niche</span><input id="gNiche" value="Beauty / skincare"></label>
+          <label class="f"><span data-i="tone">Tone</span><select id="gTone"><option>Bestie, playful</option><option>Luxury, calm</option><option>Bold, high-energy</option><option>Expert, educational</option><option>Funny, chaotic</option></select></label>
+          <label class="f"><span data-i="outLang">Output language</span><select id="gLang" class="olang"></select></label>
+        </div>
+        <div><span class="lbl" data-i="platforms">Platforms</span><div class="chips" id="gPlats"></div></div>
+        <div><button class="btn ai" id="gGo"><span data-i="generate">Generate</span></button></div>
+      </div>
+      <div id="gOut"></div>
+    </section>
+
+    <section class="view" id="v-copilot">
+      <div class="head"><div><div class="eyebrow">AI COPILOT · GOOGLE FLOW READY</div><h1><span data-i="cpH1a">Hooks, character &</span> <span class="g" data-i="cpH1b">Flow video prompts</span></h1><p class="sub" data-i="cpSub">Describe your character in your own words. You get scroll-stopping hooks, a locked character sheet, image prompts for Flow Ingredients, and shot-by-shot Veo prompts with camera, audio and dialogue.</p></div></div>
+      <div class="card grid">
+        <div class="grid g2">
+          <label class="f"><span data-i="topic">Topic</span><input id="cpTopic" value="I tried a 5 AM morning routine for 7 days"></label>
+          <label class="f"><span data-i="platform">Platform</span><select id="cpPlat"><option>TikTok (9:16)</option><option>Instagram Reels (9:16)</option><option>YouTube Shorts (9:16)</option><option>YouTube (16:9)</option></select></label>
+        </div>
+        <label class="f"><span data-i="charLook">How your character looks (write it your way)</span>
+          <textarea id="cpChar">Young woman, mid-20s, warm brown skin, long dark wavy hair in a claw clip, soft glam makeup with glossy lips, small gold hoops, oversized cream knit sweater, light-wash jeans, white sneakers. Bright, confident smile.</textarea></label>
+        <div class="grid g3">
+          <label class="f"><span data-i="style">Visual style</span><select id="cpStyle"><option>Photoreal, iPhone UGC look</option><option>Cinematic, film grain</option><option>Pixar-style 3D animation</option><option>Anime</option><option>Clean studio, beauty ad</option></select></label>
+          <label class="f"><span data-i="scenes">Scenes</span><select id="cpScenes"><option>3</option><option selected>4</option><option>5</option><option>6</option></select></label>
+          <label class="f"><span data-i="outLang">Output language</span><select id="cpLang" class="olang"></select></label>
+        </div>
+        <label class="f"><span data-i="extra">Extra direction (optional)</span><input id="cpExtra" placeholder="e.g. cozy apartment, golden hour, end with a question for comments"></label>
+        <div class="row"><button class="btn ai" id="cpGo"><span data-i="build">Build my pack</span></button>
+          <button class="btn ghost sm" id="cpSave"><span data-i="saveChar">Save character</span></button>
+          <select id="cpSaved" style="width:auto;max-width:100%" aria-label="Saved characters"></select></div>
+      </div>
+      <div id="cpOut"></div>
+      <details><summary data-i="flowHow">How to use this in Google Flow</summary>
+        <ol class="small muted flowlist">
+          <li>Make the character reference images first with the Ingredients prompts, in Flow or Imagen. Keep the one that looks most like your character.</li>
+          <li>Start a Flow project, choose Ingredients to Video, and add that image so she looks the same in every shot.</li>
+          <li>Paste one scene prompt at a time. Each Veo clip is about 8 seconds, so one scene is one clip.</li>
+          <li>The character sheet is repeated word for word in every scene. Don't edit it between scenes, that's what keeps her consistent.</li>
+          <li>Line the clips up in Scene Builder. Use Extend when a shot needs to continue the same action.</li>
+          <li>Dialogue goes in quotes. Keep each line short enough to say in about 6 seconds.</li>
+          <li>Add captions and on-screen text in your editor afterwards. Video models often misspell text.</li>
+        </ol>
+      </details>
+    </section>
+
+    <section class="view" id="v-prefs">
+      <div class="head"><div><div class="eyebrow">SETUP</div><h1><span class="g" data-i="setH1">Settings</span></h1></div></div>
+      <div class="card grid">
+        <label class="f"><span data-i="uiLang">Language</span><select id="lang2"></select></label>
+        <label class="f"><span>Gemini API key</span><input id="sKey" type="password" placeholder="AIza…" autocomplete="off"></label>
+        <label class="f"><span>Gemini model</span><input id="sModel" value="gemini-2.5-flash"></label>
+        <label class="f"><span data-i="defLang">Default output language</span><select id="sLang" class="olang"></select></label>
+        <div><button class="btn" id="sSave"><span data-i="save">Save</span></button></div>
+        <p class="small muted">Trends refresh automatically every morning at 9 AM Pakistan time. The tag checker, SEO generator and copilot use your own Gemini key, which stays in this browser and is sent only to Google. In Google Cloud, restrict the key to the Generative Language API and to this website.</p>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* ---------- i18n ---------- */
+const UI_LANGS={en:"English",es:"Español",hi:"हिन्दी",ur:"اردو",ar:"العربية"};
+const OUT_LANGS=["English","Spanish","Hindi","Urdu","Roman Urdu","Arabic","French","Portuguese","German","Italian","Korean","Japanese","Turkish","Indonesian","Bengali","Chinese (Simplified)"];
+const T={
+en:{today:"Today",tags:"Hashtags",creators:"Creators",songs:"Songs",apps:"Apps",check:"Tag checker",gen:"SEO generator",copilot:"AI Copilot",prefs:"Settings",uiLang:"Language",platform:"Platform",outLang:"Output language",title:"Title / hook",desc:"Description / caption",tags_:"Hashtags / tags",rateIt:"Rate it",topic:"Topic",niche:"Niche",tone:"Tone",platforms:"Platforms",generate:"Generate",charLook:"How your character looks (write it your way)",style:"Visual style",scenes:"Scenes",extra:"Extra direction (optional)",build:"Build my pack",saveChar:"Save character",defLang:"Default output language",save:"Save",copied:"Copied",loading:"Loading today's trends…",thinking:"Writing…",live:"Live",updated:"Updated",all:"All",hooks:"Hooks",charSheet:"Character sheet (paste in every scene)",imgPrompts:"Image prompts (Flow Ingredients)",flowScenes:"Flow / Veo scene prompts",negative:"Avoid",copy:"Copy",copyAll:"Copy all",saved:"Saved",topicsN:"hot topics",tagsN:"hashtags",songsN:"songs",appsN:"apps",sources:"Sources",verdict:"Verdict",fixes:"Fix these",better:"Rewritten for you",tagsToUse:"Use these tags",risky:"Drop these",titles:"Title options",keywords:"Search keywords",noFeed:"Today's trends haven't loaded yet. They refresh every morning at 9 AM Pakistan time.",slow:"Couldn't load today's trends. Check your internet connection and reload the page.",noAI:"AI isn't available in this view.",denied:"AI access was turned off for this page. Turn it on from the page's Permissions menu.",busy:"Too many requests right now. Wait a minute and try again.",growth:"30-day growth",followers:"Followers",toCopilot:"Use in copilot",stale:"These are the latest trends we have. Today's update hasn't run yet."},
+es:{today:"Hoy",tags:"Hashtags",creators:"Creadores",songs:"Canciones",apps:"Apps",check:"Revisar tags",gen:"Generador SEO",copilot:"Copiloto IA",prefs:"Ajustes",uiLang:"Idioma",platform:"Plataforma",outLang:"Idioma de salida",title:"Título / gancho",desc:"Descripción",tags_:"Hashtags",rateIt:"Calificar",topic:"Tema",niche:"Nicho",tone:"Tono",platforms:"Plataformas",generate:"Generar",charLook:"Cómo se ve tu personaje (con tus palabras)",style:"Estilo visual",scenes:"Escenas",extra:"Indicaciones extra (opcional)",build:"Crear mi pack",saveChar:"Guardar personaje",defLang:"Idioma por defecto",save:"Guardar",copied:"Copiado",loading:"Cargando tendencias…",thinking:"Escribiendo…",live:"En vivo",updated:"Actualizado",all:"Todo",hooks:"Ganchos",charSheet:"Ficha del personaje (pégala en cada escena)",imgPrompts:"Prompts de imagen (Ingredients)",flowScenes:"Prompts de escenas para Flow / Veo",negative:"Evitar",copy:"Copiar",copyAll:"Copiar todo",saved:"Guardado",topicsN:"temas",tagsN:"hashtags",songsN:"canciones",appsN:"apps",sources:"Fuentes",verdict:"Veredicto",fixes:"Corrige esto",better:"Reescrito para ti",tagsToUse:"Usa estos tags",risky:"Quita estos",titles:"Opciones de título",keywords:"Palabras clave",growth:"Crecimiento 30 días",followers:"Seguidores",toCopilot:"Usar en copiloto"},
+hi:{today:"आज",tags:"हैशटैग",creators:"क्रिएटर्स",songs:"गाने",apps:"ऐप्स",check:"टैग चेकर",gen:"SEO जनरेटर",copilot:"AI कोपायलट",prefs:"सेटिंग्स",uiLang:"भाषा",platform:"प्लेटफ़ॉर्म",outLang:"आउटपुट भाषा",title:"टाइटल / हुक",desc:"डिस्क्रिप्शन / कैप्शन",tags_:"हैशटैग",rateIt:"रेट करें",topic:"टॉपिक",niche:"निश",tone:"टोन",platforms:"प्लेटफ़ॉर्म",generate:"बनाएं",charLook:"आपका कैरेक्टर कैसा दिखता है (अपने शब्दों में)",style:"विज़ुअल स्टाइल",scenes:"सीन",extra:"अतिरिक्त निर्देश (वैकल्पिक)",build:"मेरा पैक बनाएं",saveChar:"कैरेक्टर सेव करें",defLang:"डिफ़ॉल्ट भाषा",save:"सेव",copied:"कॉपी हो गया",loading:"आज के ट्रेंड लोड हो रहे हैं…",thinking:"लिख रहे हैं…",live:"लाइव",updated:"अपडेट",all:"सभी",hooks:"हुक्स",charSheet:"कैरेक्टर शीट (हर सीन में पेस्ट करें)",imgPrompts:"इमेज प्रॉम्प्ट (Ingredients)",flowScenes:"Flow / Veo सीन प्रॉम्प्ट",negative:"बचें",copy:"कॉपी",copyAll:"सब कॉपी करें",saved:"सेव हो गया",topicsN:"टॉपिक",tagsN:"हैशटैग",songsN:"गाने",appsN:"ऐप्स",sources:"स्रोत",verdict:"निष्कर्ष",fixes:"ये ठीक करें",better:"आपके लिए दोबारा लिखा",tagsToUse:"ये टैग लगाएं",risky:"ये हटाएं",titles:"टाइटल विकल्प",keywords:"सर्च कीवर्ड",growth:"30 दिन की ग्रोथ",followers:"फॉलोअर्स",toCopilot:"कोपायलट में इस्तेमाल करें"},
+ur:{today:"آج",tags:"ہیش ٹیگ",creators:"کریئیٹرز",songs:"گانے",apps:"ایپس",check:"ٹیگ چیکر",gen:"SEO جنریٹر",copilot:"AI کوپائلٹ",prefs:"ترتیبات",uiLang:"زبان",platform:"پلیٹ فارم",outLang:"آؤٹ پٹ زبان",title:"عنوان / ہُک",desc:"تفصیل / کیپشن",tags_:"ہیش ٹیگ",rateIt:"ریٹ کریں",topic:"موضوع",niche:"نِش",tone:"لہجہ",platforms:"پلیٹ فارمز",generate:"بنائیں",charLook:"آپ کا کردار کیسا دکھتا ہے (اپنے الفاظ میں)",style:"ویژول اسٹائل",scenes:"مناظر",extra:"اضافی ہدایات (اختیاری)",build:"میرا پیک بنائیں",saveChar:"کردار محفوظ کریں",defLang:"ڈیفالٹ زبان",save:"محفوظ کریں",copied:"کاپی ہو گیا",loading:"آج کے ٹرینڈز لوڈ ہو رہے ہیں…",thinking:"لکھا جا رہا ہے…",live:"لائیو",updated:"اپڈیٹ",all:"سب",hooks:"ہُکس",charSheet:"کردار شیٹ (ہر سین میں پیسٹ کریں)",imgPrompts:"امیج پرامپٹس (Ingredients)",flowScenes:"Flow / Veo سین پرامپٹس",negative:"پرہیز",copy:"کاپی",copyAll:"سب کاپی کریں",saved:"محفوظ ہو گیا",topicsN:"موضوعات",tagsN:"ہیش ٹیگ",songsN:"گانے",appsN:"ایپس",sources:"ذرائع",verdict:"فیصلہ",fixes:"یہ ٹھیک کریں",better:"آپ کے لیے دوبارہ لکھا",tagsToUse:"یہ ٹیگ لگائیں",risky:"یہ ہٹا دیں",titles:"عنوان کے آپشن",keywords:"سرچ کی ورڈز",growth:"30 دن کی گروتھ",followers:"فالوورز",toCopilot:"کوپائلٹ میں استعمال کریں",noFeed:"آج کے ٹرینڈز ابھی لوڈ نہیں ہوئے۔ یہ ہر صبح پاکستانی وقت 9 بجے اپڈیٹ ہوتے ہیں۔"},
+ar:{today:"اليوم",tags:"الهاشتاغات",creators:"صنّاع المحتوى",songs:"الأغاني",apps:"التطبيقات",check:"فاحص الوسوم",gen:"مولّد SEO",copilot:"مساعد AI",prefs:"الإعدادات",uiLang:"اللغة",platform:"المنصة",outLang:"لغة الإخراج",title:"العنوان / الخطاف",desc:"الوصف / التعليق",tags_:"الهاشتاغات",rateIt:"قيّم",topic:"الموضوع",niche:"المجال",tone:"النبرة",platforms:"المنصات",generate:"إنشاء",charLook:"كيف تبدو شخصيتك (بكلماتك)",style:"النمط البصري",scenes:"المشاهد",extra:"توجيه إضافي (اختياري)",build:"أنشئ الحزمة",saveChar:"احفظ الشخصية",defLang:"اللغة الافتراضية",save:"حفظ",copied:"تم النسخ",loading:"جارٍ تحميل ترندات اليوم…",thinking:"جارٍ الكتابة…",live:"مباشر",updated:"آخر تحديث",all:"الكل",hooks:"الخطافات",charSheet:"بطاقة الشخصية (الصقها في كل مشهد)",imgPrompts:"أوامر الصور (Ingredients)",flowScenes:"أوامر مشاهد Flow / Veo",negative:"تجنّب",copy:"نسخ",copyAll:"نسخ الكل",saved:"تم الحفظ",topicsN:"مواضيع",tagsN:"هاشتاغ",songsN:"أغانٍ",appsN:"تطبيقات",sources:"المصادر",verdict:"الحكم",fixes:"أصلح هذا",better:"أعدنا كتابته لك",tagsToUse:"استخدم هذه الوسوم",risky:"احذف هذه",titles:"خيارات العنوان",keywords:"كلمات البحث",growth:"نمو 30 يومًا",followers:"المتابعون",toCopilot:"استخدم في المساعد"}
+};
+const store={get(k,d){try{const v=localStorage.getItem("trendora:"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem("trendora:"+k,JSON.stringify(v))}catch(e){}}};
+const S={lang:store.get("lang","en"),outLang:store.get("outLang","English")};
+const t=k=>(T[S.lang]&&T[S.lang][k])||T.en[k]||k;
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m){const el=$("#toast");el.textContent=m;el.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("show"),1400)}
+async function copy(txt){try{await navigator.clipboard.writeText(txt);toast(t("copied"))}catch(e){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast(t("copied"))}catch(_){}ta.remove()}}
+document.addEventListener("click",e=>{const c=e.target.closest("[data-copy]");if(c)copy(c.dataset.copy);const u=e.target.closest("[data-use]");if(u)useTopic(u.dataset.use)});
+
+/* ---------- nav ---------- */
+const ICONS={
+today:'<path d="M12 2c1 3 4 4.5 4 8a4 4 0 1 1-8 0c0-1.5.6-2.6 1.5-3.5C10 8 11 6 12 2z"/><path d="M12 22a6 6 0 0 0 6-6"/>',
+tags:'<path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/>',
+creators:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+songs:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+apps:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+check:'<path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>',
+gen:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+copilot:'<path d="M12 3l2.2 5.3L20 9l-4.4 3.8L17 19l-5-3-5 3 1.4-6.2L4 9l5.8-.7z"/>',
+prefs:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>'};
+const VIEWS=["today","tags","creators","songs","apps","check","gen","copilot","prefs"];
+let CURRENT=null;
+function buildNav(){$("#nav").innerHTML=VIEWS.map(v=>`<button data-v="${v}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[v]}</svg><span>${esc(t(v))}</span></button>`).join("");$$("#nav button").forEach(b=>b.onclick=()=>show(b.dataset.v))}
+function show(v){if(!VIEWS.includes(v))v="today";CURRENT=v;$$(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));$$("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));try{if(location.hash!=="#"+v)history.replaceState(null,"","#"+v)}catch(e){}try{window.scrollTo({top:0})}catch(e){}}
+addEventListener("hashchange",()=>{try{show(location.hash.slice(1))}catch(e){}});
+function startView(){try{return location.hash.slice(1)||"today"}catch(e){return "today"}}
+
+function applyLang(){
+  document.documentElement.lang=S.lang;document.documentElement.dir=(S.lang==="ur"||S.lang==="ar")?"rtl":"ltr";
+  $$("[data-i]").forEach(el=>{const k=el.dataset.i;if(!el.dataset.en)el.dataset.en=el.textContent;el.textContent=(T[S.lang]&&T[S.lang][k])||el.dataset.en});
+  buildNav();show(CURRENT||startView());renderAll();
+}
+function fillLangSelects(){
+  const ui=Object.entries(UI_LANGS).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+  ["#lang","#langM","#lang2"].forEach(s=>{$(s).innerHTML=ui;$(s).value=S.lang;$(s).onchange=e=>{S.lang=e.target.value;store.set("lang",S.lang);["#lang","#langM","#lang2"].forEach(x=>$(x).value=S.lang);applyLang()}});
+  $$(".olang").forEach(sel=>{sel.innerHTML=OUT_LANGS.map(l=>`<option>${l}</option>`).join("");sel.value=S.outLang});
+}
+
+/* ---------- trend feed from the shared store ---------- */
+let FEED=null,feedState="loading",plat="all";
+const DATA_URL="https://raw.githubusercontent.com/Jaxib332/trendora/main/data.json";
+async function initFeed(){
+  const urls=["data.json?t="+Date.now(),DATA_URL+"?t="+Date.now()];
+  for(const u of urls){try{const r=await fetch(u,{cache:"no-store"});if(r.ok){FEED=await r.json();feedState="ok";renderAll();return}}catch(e){}}
+  feedState="slow";renderAll();
+}
+let FEED_SAVED=false;
+const pktToday=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Karachi"}).format(new Date());
+const usLong=()=>new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",weekday:"long",month:"long",day:"numeric",year:"numeric"}).format(new Date());
+
+/* ---------- render ---------- */
+const loader=msg=>`<div class="card loader"><div class="spin"></div>${esc(msg||t("loading"))}</div>`;
+const note=(m,kind)=>`<div class="${kind||"banner"}">${esc(m)}</div>`;
+const srcs=list=>list&&list.length?`<div class="sources"><span class="muted">${esc(t("sources"))}:</span>${list.slice(0,8).map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title||"link")}</a>`).join("")}</div>`:"";
+const pp=p=>`<span class="pill p-${esc(String(p).split(/[ /]/)[0])}">${esc(p)}</span>`;
+function guard(){
+  if(feedState==="ok")return null;
+  if(feedState==="loading")return loader();
+  if(feedState==="slow")return note(t("slow"),"err");
+  if(feedState==="nodb")return note(t("noAI"),"err");
+  return `<div class="card empty"><div class="orb big"></div><h2>${esc(t("noFeed"))}</h2></div>`;
+}
+function renderStatus(){
+  $("#todayDate").textContent="USA · "+usLong();
+  let html="";
+  if(FEED){const at=FEED.updatedAt?new Date(FEED.updatedAt):null;
+    html=`<span class="dot ${FEED_SAVED?"demo":""}"></span><span>${esc(FEED_SAVED?"Saved copy":t("live"))}${at?" · "+esc(t("updated"))+" "+esc(at.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})):""}</span>`}
+  $("#sideStatus").innerHTML=html;$("#topStatus").innerHTML=html;
+  $("#notice").innerHTML=FEED&&FEED.date&&FEED.date<pktToday()&&new Date().getHours()>=10?note(t("stale")):"";
+}
+function renderToday(){
+  const g=guard();
+  const tp=FEED?.topics||[],hs=FEED?.hashtags||{};
+  const nTags=Object.values(hs).reduce((a,b)=>a+(b?.length||0),0);
+  const nApps=(FEED?.apps||[]).reduce((a,c)=>a+(c.apps?.length||0),0);
+  $("#heroStats").innerHTML=[[tp.length,t("topicsN")],[nTags,t("tagsN")],[(FEED?.songs||[]).length,t("songsN")],[nApps,t("appsN")]].map(([n,l])=>`<div class="card tilt"><b>${n||"–"}</b><span class="small muted">${esc(l)}</span></div>`).join("");
+  const plats=["all","fitness","TikTok","Instagram","YouTube","Google"];
+  $("#platTabs").innerHTML=plats.map(p=>`<button class="tab ${plat===p?"on":""} ${p==="fitness"?"tab-niche":""}" data-p="${p}">${esc(p==="all"?t("all"):p==="fitness"?"Fitness & GLP-1":p==="Instagram"?"Meta / Instagram":p)}</button>`).join("");
+  $$("#platTabs .tab").forEach(b=>b.onclick=()=>{plat=b.dataset.p;renderToday()});
+  if(g){$("#topicsBox").innerHTML=g;return}
+  const isNiche=x=>x.niche==="fitness";
+  const match=x=>plat==="all"||(plat==="fitness"?isNiche(x):(x.platforms||[x.platform]).some(p=>p===plat||(plat==="Instagram"&&/Instagram|Threads|Facebook|Meta/.test(p))));
+  const list=tp.filter(match).sort((a,b)=>(isNiche(b)-isNiche(a))||((b.heat||0)-(a.heat||0)));
+  $("#topicsBox").innerHTML=`<div class="grid auto">${list.map(x=>`<article class="card tilt topic">
+    <div class="row" style="justify-content:space-between"><div class="row" style="gap:6px">${isNiche(x)?`<span class="pill niche">Fitness & GLP-1</span>`:""}${(x.platforms||[x.platform]).map(pp).join("")}</div><span class="stat">${Number(x.heat)||0}°</span></div>
+    <div class="t">${esc(x.title)}</div>
+    <div class="heat"><i style="width:${Math.max(4,Math.min(100,Number(x.heat)||0))}%"></i></div>
+    <div class="small muted">${esc(x.why)}</div>
+    ${x.sound?`<div class="small"><span class="muted">♫</span> ${esc(x.sound)}</div>`:""}
+    <div class="angle">${esc(x.angle)}</div>
+    <div class="tags">${(x.hashtags||[]).map(h=>`<button class="tag" data-copy="${esc(h)}">${esc(h)}</button>`).join("")}</div>
+    <div class="row"><button class="btn ghost sm" data-copy="${esc((x.hashtags||[]).join(" "))}">${esc(t("copyAll"))}</button><button class="btn ghost sm" data-use="${esc(x.title)}">${esc(t("toCopilot"))} →</button></div>
+  </article>`).join("")||`<div class="card muted">–</div>`}</div>${srcs(FEED.sources?.topics)}`;
+  bindTilt();
+}
+function useTopic(title){$("#cpTopic").value=title;$("#gTopic").value=title;show("copilot")}
+function renderTags(){
+  const g=guard();if(g){$("#tagsBox").innerHTML=g;return}
+  const hs=FEED.hashtags||{};
+  $("#tagsBox").innerHTML=Object.entries(hs).sort((a,b)=>(b[0]==="Fitness")-(a[0]==="Fitness")).map(([p,arr])=>`<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:12px">${pp(p)}<button class="btn ghost sm" data-copy="${esc((arr||[]).map(a=>a.tag).join(" "))}">${esc(t("copyAll"))}</button></div>
+  <div class="kv">${(arr||[]).map(a=>`<div class="tagrow"><button class="tag" data-copy="${esc(a.tag)}">${esc(a.tag)}</button><span class="small muted">${esc(a.note)}</span></div>`).join("")}</div></div>`).join("");
+}
+function renderCreators(){
+  const g=guard();if(g){$("#creatorsBox").innerHTML=g;return}
+  $("#creatorsBox").innerHTML=(FEED.creators||[]).slice(0,5).map((c,i)=>`<article class="card tilt creator"><div class="portrait" style="--h:${hue(c.name)}" aria-hidden="true">${BUST}<span class="prank">0${i+1}</span><span class="badge">${nicheIcon(c.niche)}</span></div><div class="cbody">
+    <div class="row" style="justify-content:space-between"><h2>${esc(c.name)} <span class="muted small mono">${esc(c.handle)}</span></h2>${pp(c.platform)}</div>
+    <div class="row" style="margin:8px 0"><span class="stat">${esc(t("followers"))}: ${esc(c.followers)}</span><span class="stat">${esc(t("growth"))}: ${esc(c.growth)}</span><span class="pill">${esc(c.niche)}</span></div>
+    <div class="small">${esc(c.why)}</div><div class="angle" style="margin-top:8px">${esc(c.lesson)}</div>
+    ${(c.accounts||[]).length?`<div class="accts">${c.accounts.map(a=>`<a class="acct p-${esc(String(a.platform).split(/[ /]/)[0])}" href="${esc(a.url)}" target="_blank" rel="noopener noreferrer"><span class="acct-p">${esc(a.platform)}</span><span class="acct-h">${esc(a.handle)}</span><span class="acct-n">${esc(a.followers||"n/a")}${a.asOf?` <i>· ${esc(a.asOf)}</i>`:""}</span></a>`).join("")}</div>`:""}
+    </div></article>`).join("")+srcs(FEED.sources?.creators);bindTilt();
+}
+function initials(n){return String(n||"?").replace(/[^\p{L}\p{N} ]/gu,"").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase()||"?"}
+const BUST='<svg class="bust" viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet"><circle cx="50" cy="46" r="21"/><path d="M50 72c-11 0-19-4-19-4l-1 0C14 72 4 86 4 120h92c0-34-10-48-26-52l-1 0s-8 4-19 4z"/></svg>';
+const NICHE_ICONS={music:'<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',beauty:'<path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z"/><path d="M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',fashion:'<path d="M8 4l4 3 4-3 4 4-3 3v9H7v-9L4 8z"/>',edu:'<path d="M3 9l9-5 9 5-9 5z"/><path d="M7 11.5V16c3 2 7 2 10 0v-4.5"/>',business:'<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V5h6v3"/>',sport:'<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16"/>',food:'<path d="M7 3v8a2 2 0 0 0 2 2v8M11 3v6M5 3v6M17 3c-2 2-2 6 0 8v10"/>',gaming:'<rect x="3" y="8" width="18" height="9" rx="4"/><path d="M8 11v3M6.5 12.5h3"/><circle cx="16" cy="12" r="1"/>',ent:'<path d="M7 5l12 7-12 7z"/>'};
+function nicheIcon(n){n=String(n||"").toLowerCase();const k=/music|sing|rap/.test(n)?"music":/beauty|makeup|skin/.test(n)?"beauty":/fashion|style|outfit/.test(n)?"fashion":/kid|edu|learn|teach/.test(n)?"edu":/business|finance|money/.test(n)?"business":/sport|fitness|gym/.test(n)?"sport":/food|cook|recipe/.test(n)?"food":/gam/.test(n)?"gaming":"ent";return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${NICHE_ICONS[k]}</svg>`}
+function hue(n){let h=0;for(const ch of String(n))h=(h*31+ch.charCodeAt(0))%360;return h}
+function renderSongs(){
+  const g=guard();if(g){$("#songsBox").innerHTML=g;return}
+  $("#songsBox").innerHTML=(FEED.songs||[]).slice(0,5).map((s,i)=>`<article class="card tilt list-item"><div class="rank">0${i+1}</div><div>
+    <div class="row" style="justify-content:space-between"><h2>${esc(s.title)}</h2>${s.chart?`<span class="stat">${esc(s.chart)}</span>`:""}</div>
+    <div class="muted">${esc(s.artist)} · <span class="small">${esc(s.where)}</span></div>
+    <div class="angle" style="margin-top:8px">${esc(s.use)}</div></div></article>`).join("")+srcs(FEED.sources?.songs);bindTilt();
+}
+function renderApps(){
+  const g=guard();if(g){$("#appsBox").innerHTML=g;return}
+  $("#appsBox").innerHTML=(FEED.apps||[]).map(c=>`<div class="card tilt app-cat"><h2>${esc(c.name)}</h2>${(c.apps||[]).filter(a=>!/capcut/i.test(a.name)).map(a=>`<div class="app-row"><div style="min-width:0"><b>${esc(a.name)}</b><div class="small muted">${esc(a.note)}</div></div><span class="pill">${esc(a.store)}</span></div>`).join("")}</div>`).join("")+`<div style="grid-column:1/-1">${srcs(FEED.sources?.apps)}</div>`;bindTilt();
+}
+function renderAll(){renderStatus();renderToday();renderTags();renderCreators();renderSongs();renderApps()}
+
+/* ---------- 3D tilt ---------- */
+function bindTilt(){if(matchMedia("(prefers-reduced-motion:reduce)").matches||matchMedia("(hover:none)").matches)return;
+  $$(".tilt").forEach(el=>{if(el._t)return;el._t=1;el.addEventListener("mousemove",e=>{const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;el.style.transform=`perspective(900px) rotateX(${-y*6}deg) rotateY(${x*8}deg) translateZ(4px)`});el.addEventListener("mouseleave",()=>el.style.transform="")})}
+
+/* ---------- AI (Claude via the page) ---------- */
+const OPEN_URL="https://claude.ai/artifact/7TnPxcZ2wFpUhCWXf2YwFb";
+function trendContext(){
+  if(!FEED)return "No trend data loaded.";
+  return "TODAY'S US TRENDS ("+(FEED.date||"")+"):\n"+(FEED.topics||[]).map(x=>`- ${x.title} [${(x.platforms||[]).join("/")}]${x.sound?" sound: "+x.sound:""}: ${x.why}`).join("\n")+
+  "\nTRENDING SONGS: "+(FEED.songs||[]).map(s=>`${s.title} – ${s.artist}`).join("; ")+
+  "\nTAGS IN USE: "+Object.entries(FEED.hashtags||{}).map(([p,a])=>p+": "+(a||[]).map(x=>x.tag).join(" ")).join(" | ");
+}
+const KEY=()=>store.get("gkey",""),MODEL=()=>store.get("gmodel","gemini-2.5-flash");
+async function askAI(prompt,tier){
+  if(!KEY()){const e=new Error("nokey");e.code="nokey";throw e}
+  let last;
+  for(let i=0;i<2;i++){
+    let r,d;
+    try{r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL())}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":KEY()},body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:tier==="complex"?0.85:0.6,responseMimeType:"application/json"}})});d=await r.json().catch(()=>({}))}
+    catch(e){const err=new Error("Couldn't reach Google's Gemini API. Check your internet connection and try again.");err.code="net";throw err}
+    if(!r.ok){last=new Error(r.status===429?t("busy"):(r.status===400||r.status===403)?"Gemini rejected the key. Check it in Settings, or make a new one at aistudio.google.com/apikey.":(d.error?.message||"Gemini error "+r.status));last.code=r.status===400||r.status===403?"badkey":"api";if(r.status>=500||r.status===429){await new Promise(z=>setTimeout(z,2500));continue}throw last}
+    const txt=(d.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
+    try{return JSON.parse(txt.replace(/```json|```/g,"").trim())}catch(e){last=new Error("Gemini sent an answer that wasn't valid. Tap the button again.")}
+  }
+  throw last;
+}
+function aiError(e){
+  if(e.code==="nokey"||e.code==="badkey")return `<div class="err fixbox"><b>${e.code==="nokey"?"Add your Gemini key to use AI tools.":esc(e.message)}</b><span>Your key is saved only in this browser. Get a free one at aistudio.google.com/apikey.</span><button class="btn sm" onclick="show('prefs')">Open Settings</button></div>`;
+  return note(e.message,"err");
+}
+async function runTool(btn,out,fn){btn.disabled=true;out.innerHTML=loader(t("thinking"));try{await fn()}catch(e){out.innerHTML=aiError(e)}finally{btn.disabled=false}}
+const copyBtn=(txt,label)=>`<button class="btn ghost sm copy" data-copy="${esc(txt)}">${esc(label||t("copy"))}</button>`;
+
+$("#ckGo").onclick=()=>runTool($("#ckGo"),$("#ckOut"),async()=>{
+  const p=$("#ckPlat").value,lang=$("#ckLang").value;
+  const d=await askAI(`You are a strict US social media SEO and growth expert. Rate this ${p} post for reach with a US audience. Be honest, not flattering. Scores are 0-100.
+${trendContext()}
+
+TITLE/HOOK: ${$("#ckTitle").value}
+DESCRIPTION: ${$("#ckDesc").value}
+TAGS: ${$("#ckTags").value}
+
+Judge: hook strength in the first 2 seconds, keyword placement in the first 125 characters, tag mix (broad + mid + niche, no spammy tags like #fyp-only stacks), and fit with today's trends above. Write all text values in ${lang}; keep hashtags as hashtags.
+Return ONLY JSON: {"overall":0,"scores":{"Hook":0,"Title SEO":0,"Description":0,"Hashtags":0,"Trend fit":0},"verdict":"2 sentences","issues":["specific problem + fix"],"betterTitle":"","betterDescription":"","betterTags":["#"],"dropTags":["#tag – why"]}`);
+  const sc=d.scores||{};
+  $("#ckOut").innerHTML=`<div class="grid g2">
+   <div class="card scorecard"><div class="score-ring" style="--v:${+d.overall||0}"><b>${+d.overall||0}</b></div><div style="flex:1;min-width:200px"><div class="eyebrow">${esc(t("verdict"))}</div><p style="margin:6px 0 0">${esc(d.verdict)}</p></div></div>
+   <div class="card kv">${Object.entries(sc).map(([k,v])=>`<div class="bar-row"><span class="muted">${esc(k)}</span><div class="heat"><i style="width:${+v||0}%"></i></div><b class="stat">${+v||0}</b></div>`).join("")}</div>
+   <div class="card"><h2 style="margin-bottom:10px">${esc(t("fixes"))}</h2><ul class="ul">${(d.issues||[]).map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>
+   <div class="card kv"><h2>${esc(t("better"))}</h2><div class="out">${esc(d.betterTitle)}${copyBtn(d.betterTitle)}</div><div class="out">${esc(d.betterDescription)}${copyBtn(d.betterDescription)}</div></div>
+   <div class="card"><h2 style="margin-bottom:10px">${esc(t("tagsToUse"))}</h2><div class="tags">${(d.betterTags||[]).map(h=>`<button class="tag" data-copy="${esc(h)}">${esc(h)}</button>`).join("")}</div><button class="btn ghost sm" style="margin-top:12px" data-copy="${esc((d.betterTags||[]).join(" "))}">${esc(t("copyAll"))}</button></div>
+   <div class="card"><h2 style="margin-bottom:10px">${esc(t("risky"))}</h2><ul class="ul small">${(d.dropTags||[]).map(i=>`<li>${esc(i)}</li>`).join("")||"<li class='muted'>–</li>"}</ul></div>
+  </div>`;
+});
+
+const GEN_PLATS=["TikTok","Instagram","YouTube","Facebook","Pinterest","Threads"];let genSel=new Set(["TikTok","Instagram","YouTube"]);
+function renderChips(){$("#gPlats").innerHTML=GEN_PLATS.map(p=>`<button class="chip ${genSel.has(p)?"on":""}" data-g="${p}" aria-pressed="${genSel.has(p)}">${p}</button>`).join("");$$("#gPlats .chip").forEach(c=>c.onclick=()=>{genSel.has(c.dataset.g)?genSel.delete(c.dataset.g):genSel.add(c.dataset.g);if(!genSel.size)genSel.add("TikTok");renderChips()})}
+$("#gGo").onclick=()=>runTool($("#gGo"),$("#gOut"),async()=>{
+  const plats=[...genSel],lang=$("#gLang").value;
+  const d=await askAI(`You are a top US social media SEO strategist for a female creator.
+${trendContext()}
+
+TOPIC: ${$("#gTopic").value}
+NICHE: ${$("#gNiche").value}
+TONE: ${$("#gTone").value}
+PLATFORMS: ${plats.join(", ")}
+Where it fits naturally, tie the post to one of today's trends or sounds above. Write all text in ${lang} (hashtags may stay English when that's the form US users search).
+For each platform: a title/hook written for that platform's search, a caption that front-loads search keywords in the first 125 characters and ends with a question that invites comments, and hashtags mixing 2 broad + 3 mid + 3 niche (YouTube: 3 hashtags plus 12 tags; Pinterest: keywords instead of hashtags).
+Return ONLY JSON: {"titles":["5 title options"],"keywords":["8 phrases US people would search"],"platforms":[{"platform":"","title":"","description":"","hashtags":["#"],"tags":[]}]}`);
+  $("#gOut").innerHTML=`<div class="grid g2"><div class="card kv"><h2>${esc(t("titles"))}</h2>${(d.titles||[]).map(x=>`<div class="out">${esc(x)}${copyBtn(x)}</div>`).join("")}</div>
+  <div class="card"><h2 style="margin-bottom:10px">${esc(t("keywords"))}</h2><div class="tags">${(d.keywords||[]).map(k=>`<button class="tag" data-copy="${esc(k)}">${esc(k)}</button>`).join("")}</div></div></div>
+  <div class="grid g2">${(d.platforms||[]).map(p=>{const all=`${p.title}\n\n${p.description}\n\n${(p.hashtags||[]).join(" ")}`;return `<div class="card kv"><div class="row" style="justify-content:space-between">${pp(p.platform)}<button class="btn ghost sm" data-copy="${esc(all)}">${esc(t("copyAll"))}</button></div>
+   <h2>${esc(p.title)}</h2><div class="out">${esc(p.description)}</div><div class="tags">${(p.hashtags||[]).map(h=>`<button class="tag" data-copy="${esc(h)}">${esc(h)}</button>`).join("")}</div>
+   ${p.tags&&p.tags.length?`<div class="small muted">Tags: ${esc(p.tags.join(", "))}</div>`:""}</div>`}).join("")}</div>`;
+});
+
+function savedChars(){return store.get("chars",[])}
+function renderSaved(){const c=savedChars();$("#cpSaved").innerHTML=`<option value="">${c.length?"Saved characters…":"No saved characters"}</option>`+c.map((x,i)=>`<option value="${i}">${esc(x.name)}</option>`).join("")}
+$("#cpSaved").onchange=e=>{const c=savedChars()[e.target.value];if(c){$("#cpChar").value=c.look;$("#cpStyle").value=c.style}};
+$("#cpSave").onclick=()=>{const look=$("#cpChar").value.trim();if(!look)return;const name=look.split(/[,.]/)[0].slice(0,40);const c=savedChars().filter(x=>x.look!==look);c.unshift({name,look,style:$("#cpStyle").value});store.set("chars",c.slice(0,12));renderSaved();toast(t("saved"))};
+$("#cpGo").onclick=()=>runTool($("#cpGo"),$("#cpOut"),async()=>{
+  const n=+$("#cpScenes").value,lang=$("#cpLang").value,plat=$("#cpPlat").value,ar=/16:9/.test(plat)?"16:9":"9:16";
+  const d=await askAI(`You are a viral short-form video director and an expert prompt writer for Google Flow (Veo video model) and Imagen.
+${trendContext()}
+
+TOPIC: ${$("#cpTopic").value}
+PLATFORM: ${plat}, aspect ratio ${ar}
+CHARACTER (the creator's own words): ${$("#cpChar").value}
+VISUAL STYLE: ${$("#cpStyle").value}
+EXTRA DIRECTION: ${$("#cpExtra").value||"none"}
+SCENES: ${n}
+Hooks, dialogue and caption in ${lang}. Image and video prompts in English (the models follow English best), but dialogue lines inside them stay in ${lang}.
+
+Make:
+1) 8 hooks for the first 2 seconds, each a different type: curiosity gap, bold claim, POV, mistake/warning, relatable, number/list, challenge, story.
+2) characterSheet: ONE locked paragraph of 55-80 words with fixed details (age, skin tone, face, hair, makeup, outfit, accessories, body language). Keep everything the creator wrote; only add details that make it more specific.
+3) imagePrompts: 4 prompts for consistent reference images to use as Flow Ingredients: front portrait on a neutral background, three-quarter view, full-body outfit, and the main location with no people. Each states style, lens, lighting and ${ar}.
+4) scenes: ${n} Veo prompts of about 8 seconds each. Inside each prompt, in this order: shot type + camera movement; the characterSheet copied word for word; the action beat by beat; setting + time of day; lighting; style/film look; audio (ambience + sound effects); dialogue written as She says: "..." (max 18 words). End every prompt with: No subtitles, no on-screen text, no watermark. Scene 1 delivers the hook in the first second. The last scene ends on a question for comments or loops back to scene 1.
+5) negative: short comma list of things to avoid.
+6) caption + 6 hashtags for posting.
+Return ONLY JSON: {"hooks":[{"type":"","text":""}],"characterSheet":"","imagePrompts":[{"name":"","prompt":""}],"scenes":[{"title":"","camera":"","dialogue":"","prompt":""}],"negative":"","caption":"","hashtags":["#"]}`,"complex");
+  const allScenes=(d.scenes||[]).map((s,i)=>`SCENE ${i+1} — ${s.title}\n${s.prompt}`).join("\n\n");
+  const cap=(d.caption||"")+"\n\n"+(d.hashtags||[]).join(" ");
+  $("#cpOut").innerHTML=`<div class="grid g2">
+   <div class="card"><div class="row" style="justify-content:space-between;margin-bottom:6px"><h2>${esc(t("hooks"))}</h2><button class="btn ghost sm" data-copy="${esc((d.hooks||[]).map(h=>h.text).join("\n"))}">${esc(t("copyAll"))}</button></div>
+     ${(d.hooks||[]).map(h=>`<div class="hook"><span class="k">${esc(h.type)}</span><span class="txt">${esc(h.text)}</span><button class="btn ghost sm" data-copy="${esc(h.text)}">${esc(t("copy"))}</button></div>`).join("")}</div>
+   <div class="card kv"><h2>${esc(t("charSheet"))}</h2><div class="out code">${esc(d.characterSheet)}${copyBtn(d.characterSheet)}</div>
+     <h2>${esc(t("negative"))}</h2><div class="out code">${esc(d.negative)}${copyBtn(d.negative)}</div>
+     <div class="out">${esc(cap)}${copyBtn(cap)}</div></div>
+  </div>
+  <div class="card kv"><h2>${esc(t("imgPrompts"))}</h2><div class="grid g2">${(d.imagePrompts||[]).map(p=>`<div class="kv"><span class="eyebrow">${esc(p.name)}</span><div class="out code">${esc(p.prompt)}${copyBtn(p.prompt)}</div></div>`).join("")}</div></div>
+  <div class="card kv"><div class="row" style="justify-content:space-between"><h2>${esc(t("flowScenes"))}</h2><button class="btn sm" data-copy="${esc(allScenes)}">${esc(t("copyAll"))}</button></div>
+   ${(d.scenes||[]).map((s,i)=>`<div class="scene"><div class="row" style="justify-content:space-between"><span class="num">SCENE ${i+1} · ~8s · ${esc(s.title)}</span><span class="pill">${esc(s.camera)}</span></div>
+   ${s.dialogue?`<div class="angle">“${esc(s.dialogue)}”</div>`:""}<div class="out code">${esc(s.prompt)}${copyBtn(s.prompt)}</div></div>`).join("")}</div>`;
+});
+
+/* ---------- settings ---------- */
+$("#sKey").value=KEY();$("#sModel").value=MODEL();
+$("#sSave").onclick=()=>{store.set("gkey",$("#sKey").value.trim());store.set("gmodel",$("#sModel").value.trim()||"gemini-2.5-flash");S.outLang=$("#sLang").value;store.set("outLang",S.outLang);$$(".olang").forEach(s=>s.value=S.outLang);toast(t("saved"))};
+
+/* ---------- 3D gradient background ---------- */
+(function(){const c=$("#bgfx"),x=c.getContext("2d");let w,h;const dpr=Math.min(devicePixelRatio||1,2);
+  const blobs=[{c:"255,61,154",r:.42,s:.00011,o:0},{c:"255,154,90",r:.34,s:.00016,o:2},{c:"79,227,255",r:.36,s:.00013,o:4},{c:"155,107,255",r:.4,s:.00009,o:1},{c:"212,255,79",r:.18,s:.0002,o:3}];
+  function size(){w=c.width=innerWidth*dpr;h=c.height=innerHeight*dpr}size();addEventListener("resize",size);
+  const still=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  function draw(tm){x.clearRect(0,0,w,h);x.globalCompositeOperation="lighter";
+    blobs.forEach((b,i)=>{const a=tm*b.s+b.o;const px=w*(.5+.38*Math.cos(a*1.3+i)),py=h*(.45+.35*Math.sin(a*1.7+i*2)),R=Math.max(w,h)*b.r*(.85+.15*Math.sin(a*3));
+      const g=x.createRadialGradient(px-R*.25,py-R*.25,R*.05,px,py,R);g.addColorStop(0,`rgba(${b.c},.3)`);g.addColorStop(.5,`rgba(${b.c},.11)`);g.addColorStop(1,`rgba(${b.c},0)`);x.fillStyle=g;x.beginPath();x.arc(px,py,R,0,7);x.fill()});
+    x.globalCompositeOperation="source-over";if(!still)requestAnimationFrame(draw)}
+  requestAnimationFrame(draw)})();
+
+/* ---------- boot ---------- */
+fillLangSelects();renderChips();renderSaved();$("#sLang").value=S.outLang;applyLang();initFeed();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,901 @@
+{
+ "apps": [
+  {
+   "apps": [
+    {
+     "name": "Muse from Meta",
+     "note": "#2 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "ChatGPT",
+     "note": "#4 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "Claude by Anthropic",
+     "note": "#9 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "Google Gemini",
+     "note": "#12 top free",
+     "store": "iOS"
+    }
+   ],
+   "name": "AI Tools"
+  },
+  {
+   "apps": [
+    {
+     "name": "Reco Social",
+     "note": "#10 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "Threads",
+     "note": "#14 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "Telegram",
+     "note": "#15 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "Instants (Instagram)",
+     "note": "#33 top free",
+     "store": "iOS"
+    }
+   ],
+   "name": "Social"
+  },
+  {
+   "apps": [
+    {
+     "name": "TikTok",
+     "note": "#16 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "Instagram",
+     "note": "#24 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "YouTube",
+     "note": "#27 top free",
+     "store": "iOS"
+    }
+   ],
+   "name": "Photo & Video"
+  },
+  {
+   "apps": [
+    {
+     "name": "Vinted",
+     "note": "#3 top free, pre-loved fashion",
+     "store": "iOS"
+    },
+    {
+     "name": "Temu",
+     "note": "#23 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "Depop",
+     "note": "#35 top free, resale fashion",
+     "store": "iOS"
+    },
+    {
+     "name": "Whatnot",
+     "note": "#36 top free, live shopping",
+     "store": "iOS"
+    }
+   ],
+   "name": "Shopping"
+  },
+  {
+   "apps": [
+    {
+     "name": "TikTok Pro - Events",
+     "note": "#1 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "PineDrama",
+     "note": "#13 top free, short dramas",
+     "store": "iOS"
+    },
+    {
+     "name": "DramaWave",
+     "note": "#37 top free, short dramas",
+     "store": "iOS"
+    }
+   ],
+   "name": "Entertainment"
+  },
+  {
+   "apps": [
+    {
+     "name": "GoWish",
+     "note": "#28 top free, holiday wishlists",
+     "store": "iOS"
+    }
+   ],
+   "name": "Lifestyle"
+  },
+  {
+   "apps": [
+    {
+     "name": "Playful Rewards",
+     "note": "#6 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "Capital One Mobile",
+     "note": "#7 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "Kalshi",
+     "note": "#11 top free",
+     "store": "iOS"
+    }
+   ],
+   "name": "Finance"
+  },
+  {
+   "apps": [
+    {
+     "name": "NYTimes",
+     "note": "#8 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "X",
+     "note": "#29 top free",
+     "store": "iOS"
+    }
+   ],
+   "name": "News"
+  },
+  {
+   "apps": [
+    {
+     "name": "Spotify",
+     "note": "#39 top free",
+     "store": "iOS"
+    },
+    {
+     "name": "McDonald's",
+     "note": "#38 top free",
+     "store": "iOS"
+    }
+   ],
+   "name": "Music & Food"
+  }
+ ],
+ "creators": [
+  {
+   "accounts": [
+    {
+     "asOf": "Nov 3",
+     "followers": "145.4M",
+     "handle": "@mrbeast",
+     "platform": "TikTok",
+     "url": "https://www.tiktok.com/@mrbeast"
+    },
+    {
+     "asOf": "Nov 5",
+     "followers": "525M",
+     "handle": "@MrBeast",
+     "platform": "YouTube",
+     "url": "https://www.youtube.com/@MrBeast"
+    },
+    {
+     "asOf": "Oct 8",
+     "followers": "90.1M",
+     "handle": "@mrbeast",
+     "platform": "Instagram",
+     "url": "https://www.instagram.com/mrbeast/"
+    },
+    {
+     "followers": "n/a",
+     "handle": "MrBeast",
+     "platform": "Facebook",
+     "url": "https://www.facebook.com/MrBeast6000"
+    }
+   ],
+   "followers": "145.4M",
+   "growth": "+2.7M (+1.9%)",
+   "handle": "@mrbeast",
+   "lesson": "Big stakes in the first second. State the challenge before anything else.",
+   "name": "MrBeast",
+   "niche": "Entertainment",
+   "platform": "TikTok",
+   "why": "Biggest raw follower gain among US TikTok accounts this month, and among the top 3 fastest-growing YouTube channels worldwide (+5M)."
+  },
+  {
+   "accounts": [
+    {
+     "asOf": "Nov 3",
+     "followers": "21.3M",
+     "handle": "@theestallion",
+     "platform": "TikTok",
+     "url": "https://www.tiktok.com/@theestallion"
+    },
+    {
+     "followers": "n/a",
+     "handle": "@theestallion",
+     "platform": "Instagram",
+     "url": "https://www.instagram.com/theestallion/"
+    },
+    {
+     "followers": "n/a",
+     "handle": "@megantheestallion",
+     "platform": "YouTube",
+     "url": "https://www.youtube.com/@megantheestallion"
+    }
+   ],
+   "followers": "21.3M",
+   "growth": "+1.5M (+7.8%)",
+   "handle": "@theestallion",
+   "lesson": "Personality-first clips get more engagement than polished promo.",
+   "name": "Megan Thee Stallion",
+   "niche": "Music",
+   "platform": "TikTok",
+   "why": "Second-largest US TikTok gain this month and the highest engagement in the top five, at 17.45%."
+  },
+  {
+   "accounts": [
+    {
+     "asOf": "Nov 3",
+     "followers": "8.2M",
+     "handle": "@notsophiesilva",
+     "platform": "TikTok",
+     "url": "https://www.tiktok.com/@notsophiesilva"
+    },
+    {
+     "asOf": "Feb 2026",
+     "followers": "6.3M",
+     "handle": "@notsophiesilva",
+     "platform": "YouTube",
+     "url": "https://www.youtube.com/@notsophiesilva"
+    }
+   ],
+   "followers": "8.2M",
+   "growth": "+1.3M (+18.1%)",
+   "handle": "@notsophiesilva",
+   "lesson": "Closest to your niche. Study her hooks and how often she posts.",
+   "name": "Sophie Silva",
+   "niche": "Beauty & fashion",
+   "platform": "TikTok",
+   "why": "Fastest percentage growth among large US accounts this month, with 16.64% engagement. US-based."
+  },
+  {
+   "accounts": [
+    {
+     "asOf": "Nov 3",
+     "followers": "12.3M",
+     "handle": "@kimkardashian",
+     "platform": "TikTok",
+     "url": "https://www.tiktok.com/@kimkardashian"
+    },
+    {
+     "followers": "n/a",
+     "handle": "@kimkardashian",
+     "platform": "Instagram",
+     "url": "https://www.instagram.com/kimkardashian/"
+    },
+    {
+     "followers": "n/a",
+     "handle": "Kim Kardashian",
+     "platform": "Facebook",
+     "url": "https://www.facebook.com/KimKardashian"
+    }
+   ],
+   "followers": "12.3M",
+   "growth": "+923.8K (+8.2%)",
+   "handle": "@kimkardashian",
+   "lesson": "Mix product content with behind-the-scenes so it doesn't feel like ads.",
+   "name": "Kim Kardashian",
+   "niche": "Beauty / business",
+   "platform": "TikTok",
+   "why": "Strong month on TikTok for beauty and brand content."
+  },
+  {
+   "accounts": [
+    {
+     "asOf": "Nov 3",
+     "followers": "12.2M",
+     "handle": "@msrachelforlittles",
+     "platform": "TikTok",
+     "url": "https://www.tiktok.com/@msrachelforlittles"
+    },
+    {
+     "followers": "n/a",
+     "handle": "@msrachelforlittles",
+     "platform": "Instagram",
+     "url": "https://www.instagram.com/msrachelforlittles/"
+    },
+    {
+     "followers": "n/a",
+     "handle": "@msrachel",
+     "platform": "YouTube",
+     "url": "https://www.youtube.com/@msrachel"
+    }
+   ],
+   "followers": "12.2M",
+   "growth": "+465.2K (+3.9%)",
+   "handle": "@msrachelforlittles",
+   "lesson": "Slow, warm, direct-to-camera delivery builds deep trust and repeat viewers.",
+   "name": "Ms Rachel",
+   "niche": "Kids' education",
+   "platform": "TikTok",
+   "why": "Steady growth with 13.71% engagement, one of the highest among big US accounts."
+  }
+ ],
+ "date": "2026-11-06",
+ "hashtags": {
+  "Facebook": [
+   {
+    "note": "Seasonal switch",
+    "tag": "#holidayseason"
+   },
+   {
+    "note": "Gift planning",
+    "tag": "#giftideas"
+   },
+   {
+    "note": "Broad discovery tag",
+    "tag": "#reels"
+   }
+  ],
+  "Fitness": [
+   {
+    "note": "GLP-1 journeys and news",
+    "tag": "#glp1"
+   },
+   {
+    "note": "Personal GLP-1 updates",
+    "tag": "#glp1journey"
+   },
+   {
+    "note": "Broad weight-loss tag",
+    "tag": "#weightlossjourney"
+   },
+   {
+    "note": "Gym humor trends",
+    "tag": "#gymtok"
+   },
+   {
+    "note": "Broad fitness tag",
+    "tag": "#fitnesstok"
+   },
+   {
+    "note": "Supplements and routines",
+    "tag": "#wellnesstok"
+   },
+   {
+    "note": "Safety and explainers",
+    "tag": "#healthtok"
+   }
+  ],
+  "Instagram": [
+   {
+    "note": "Mariah 'It's Time' Reels",
+    "tag": "#christmasdecor"
+   },
+   {
+    "note": "Nicole Kidman reveals",
+    "tag": "#glowup"
+   },
+   {
+    "note": "Nicole Kidman reveals",
+    "tag": "#makeuptransformation"
+   },
+   {
+    "note": "Angel of My Dreams edits",
+    "tag": "#outfitinspo"
+   },
+   {
+    "note": "Dance Reels",
+    "tag": "#damehombro"
+   },
+   {
+    "note": "Seasonal switch",
+    "tag": "#holidayseason"
+   },
+   {
+    "note": "Wishlist season",
+    "tag": "#giftguide"
+   },
+   {
+    "note": "Broad discovery tag",
+    "tag": "#reels"
+   }
+  ],
+  "TikTok": [
+   {
+    "note": "Mariah holiday switch",
+    "tag": "#itstime"
+   },
+   {
+    "note": "Tate McRae outfit/work reveals",
+    "tag": "#housewife"
+   },
+   {
+    "note": "Shoulder-bounce dance",
+    "tag": "#damehombro"
+   },
+   {
+    "note": "Runway hip-pop reveals",
+    "tag": "#angelofmydreams"
+   },
+   {
+    "note": "Wedding edits",
+    "tag": "#patientzero"
+   },
+   {
+    "note": "Wedding-regret carousels",
+    "tag": "#stopthewedding"
+   },
+   {
+    "note": "Slow-mo entrances",
+    "tag": "#prayforme"
+   },
+   {
+    "note": "Fan-transition styling",
+    "tag": "#falloutfits"
+   },
+   {
+    "note": "One-word answers",
+    "tag": "#answerinoneword"
+   },
+   {
+    "note": "Pairs with most trends above",
+    "tag": "#grwm"
+   }
+  ],
+  "YouTube": [
+   {
+    "note": "Required for Shorts discovery",
+    "tag": "#shorts"
+   },
+   {
+    "note": "Trending reveal",
+    "tag": "#elderscrolls6"
+   },
+   {
+    "note": "Long-form GRWM + storytime",
+    "tag": "#grwm"
+   },
+   {
+    "note": "Seasonal searches",
+    "tag": "#holidaydecor"
+   },
+   {
+    "note": "Seasonal searches",
+    "tag": "#giftguide"
+   }
+  ]
+ },
+ "songs": [
+  {
+   "artist": "Tate McRae",
+   "chart": "Hot 100 #2",
+   "title": "Housewife",
+   "use": "Confident GRWM or 'a day at my job' reveal.",
+   "where": "Billboard Hot 100 · TikTok and Instagram trend"
+  },
+  {
+   "artist": "Mariah Carey",
+   "chart": "5.8M Reels",
+   "title": "All I Want for Christmas Is You",
+   "use": "Halloween-to-Christmas flip in one cut.",
+   "where": "Instagram top trending audio · TikTok 'It's Time'"
+  },
+  {
+   "artist": "ADÉLA",
+   "chart": "Hot 100 #6",
+   "title": "Nicole Kidman",
+   "use": "Before-and-after glam reveal.",
+   "where": "Billboard Hot 100 · Instagram Trending"
+  },
+  {
+   "artist": "Bulin 47",
+   "chart": "TikTok viral",
+   "title": "Dame Hombro",
+   "use": "Shoulder-bounce dance with a friend or 'me vs. AI'.",
+   "where": "TikTok and Instagram dance trend"
+  },
+  {
+   "artist": "JADE",
+   "chart": "241K Reels",
+   "title": "Angel of My Dreams",
+   "use": "Runway-walk outfit reveal with the hip pop.",
+   "where": "TikTok runway trend · Instagram"
+  }
+ ],
+ "sources": {
+  "apps": [
+   {
+    "title": "Top free iPhone apps, US (AppToday, Nov 6)",
+    "url": "https://apptoday.com/charts/top-100-free-apps-us"
+   }
+  ],
+  "creators": [
+   {
+    "title": "Top 20 US TikTok influencers (influData)",
+    "url": "https://infludata.com/rankings/top-20-influencer-united-states-of-america-tiktok"
+   },
+   {
+    "title": "Fastest-growing YouTube channels (vidIQ)",
+    "url": "https://vidiq.com/youtube-stats/top/fastest-growing-youtube-channels/"
+   },
+   {
+    "title": "MrBeast stats (CreatorDB)",
+    "url": "https://creatordb.app/creatorstats/mrbeast/"
+   },
+   {
+    "title": "notsophiesilva channel (SponsorRadar)",
+    "url": "https://sponsorradar.com/channels/notsophiesilva"
+   }
+  ],
+  "songs": [
+   {
+    "title": "Billboard Hot 100 breakdown, Nov 7 (Spectrum Pulse)",
+    "url": "https://www.spectrum-pulse.ca/blog/billboard-breakdown-hot-100-november-7-2026"
+   },
+   {
+    "title": "Instagram trends, 2-8 Nov 2026 (Postdom)",
+    "url": "https://postdom.com/blog/instagram-trends"
+   },
+   {
+    "title": "TikTok Trends: November 2026 (NewEngen)",
+    "url": "https://newengen.com/insights/tiktok-trends/"
+   }
+  ],
+  "topics": [
+   {
+    "title": "TikTok Trends: November 2026 (NewEngen)",
+    "url": "https://newengen.com/insights/tiktok-trends/"
+   },
+   {
+    "title": "Instagram trends, 2-8 Nov 2026 (Postdom)",
+    "url": "https://postdom.com/blog/instagram-trends"
+   },
+   {
+    "title": "Top US searches after the midterms (IBTimes)",
+    "url": "https://www.ibtimes.co.in/habibi-meaning-blue-wave-2026-are-among-top-searches-us-after-midterm-elections-heres-why-908122"
+   },
+   {
+    "title": "Trending on YouTube US (ViralMint)",
+    "url": "https://viralmint.net/trends/youtube-trending-us/"
+   },
+   {
+    "title": "TikTok fuels GLP-1 supplement boom (Geo/Reuters)",
+    "url": "https://www.geo.tv/latest/687470-dietary-supplement-boom-tiktok-fuels-sales-among-glp-1-users-as-fda-weighs-stricter-rules"
+   },
+   {
+    "title": "Poison center calls about weight-loss drugs (Yahoo)",
+    "url": "https://www.yahoo.com/news/us/articles/calls-weight-loss-drugs-nearly-024535656.html"
+   },
+   {
+    "title": "Novo Nordisk at ObesityWeek 2026 (Yahoo Finance)",
+    "url": "https://ca.finance.yahoo.com/news/novo-nordisk-cpse-novo-b-012341434.html"
+   },
+   {
+    "title": "TikTok trends November 2026 (Ramdam)",
+    "url": "https://www.ramd.am/blog/trends-tiktok"
+   }
+  ]
+ },
+ "topics": [
+  {
+   "angle": "'What I actually spend on my GLP-1 routine' honest breakdown. Say clearly that supplements aren't medicine, tag any paid product as an ad, and tell viewers to ask their doctor.",
+   "hashtags": [
+    "#glp1",
+    "#glp1journey",
+    "#ozempic",
+    "#wellnesstok"
+   ],
+   "heat": 86,
+   "niche": "fitness",
+   "platforms": [
+    "TikTok",
+    "Google"
+   ],
+   "title": "GLP-1 supplement boom on TikTok",
+   "why": "People on Ozempic/Wegovy are buying fiber, collagen and electrolyte supplements after TikTok creators promote them for nausea, fatigue and digestion. The FDA is weighing stricter supplement rules."
+  },
+  {
+   "angle": "Safety-first PSA: why mg, units and mL get confused, and why to get meds from a licensed pharmacy and ask the pharmacist. Never give dosing numbers yourself.",
+   "hashtags": [
+    "#glp1",
+    "#medsafety",
+    "#semaglutide",
+    "#healthtok"
+   ],
+   "heat": 81,
+   "niche": "fitness",
+   "platforms": [
+    "Google"
+   ],
+   "title": "GLP-1 dosing mix-ups in the news",
+   "why": "A Washington poison center reports 665 GLP-1 medication calls so far in 2026, up from 421 last year, mostly from dosing confusion with compounded vials measured at home."
+  },
+  {
+   "angle": "60-second 'what's new in weight-loss meds this week' explainer. Cite the source on screen and avoid promising results.",
+   "hashtags": [
+    "#obesityweek",
+    "#wegovy",
+    "#weightlossjourney",
+    "#healthnews"
+   ],
+   "heat": 70,
+   "niche": "fitness",
+   "platforms": [
+    "Google",
+    "YouTube"
+   ],
+   "title": "ObesityWeek 2026: new weight-loss drug data",
+   "why": "Novo Nordisk is presenting new real-world Wegovy results and CagriSema data at ObesityWeek in early November."
+  },
+  {
+   "angle": "'Is it better to speak or to die… or to forget leg day again?' Film yourself mid-set with the text overlay.",
+   "hashtags": [
+    "#gymtok",
+    "#gymhumor",
+    "#fitnesstok",
+    "#workout"
+   ],
+   "heat": 77,
+   "niche": "fitness",
+   "platforms": [
+    "TikTok"
+   ],
+   "title": "\"Is it better to speak or to die\": gym version",
+   "why": "A fill-in-the-blank audio where creators finish the dramatic question with what they'd choose every time. Gym creators use it for workout pain points."
+  },
+  {
+   "angle": "'Me finding out you still do your whole workout from memory' then cut to your saved routine or tracker.",
+   "hashtags": [
+    "#gymtok",
+    "#fitnesshumor",
+    "#workoutroutine",
+    "#fyp"
+   ],
+   "heat": 73,
+   "niche": "fitness",
+   "platforms": [
+    "TikTok"
+   ],
+   "title": "\"No that doesn't make any sense\": gym edition",
+   "why": "Lip-sync with a confused face and a text overlay describing something that makes no sense. Fitness creators use it for workout habits."
+  },
+  {
+   "angle": "Film your 'Halloween to Christmas' flip in one cut: pumpkin decor out, tree and lights in, first holiday drink in hand.",
+   "hashtags": [
+    "#itstime",
+    "#christmasdecor",
+    "#holidayseason",
+    "#cozyseason"
+   ],
+   "heat": 97,
+   "platforms": [
+    "TikTok",
+    "Instagram"
+   ],
+   "sound": "Mariah Carey – All I Want for Christmas Is You",
+   "title": "Mariah \"It's Time\" holiday switch",
+   "why": "Halloween is over and creators are flipping to Christmas: trees go up, holiday drinks, cozy mornings. Instagram shows about 5.8M Reels on this audio."
+  },
+  {
+   "angle": "Plain morning to full look, then a quick cut of you working (filming, editing, packing orders). Add one line about showing up for yourself.",
+   "hashtags": [
+    "#housewife",
+    "#tatemcrae",
+    "#outfitreveal",
+    "#grwm"
+   ],
+   "heat": 92,
+   "platforms": [
+    "TikTok",
+    "Instagram"
+   ],
+   "sound": "Tate McRae – Housewife",
+   "title": "\"Housewife\" outfit & work reveal",
+   "why": "No. 2 on the Billboard Hot 100. Creators use it for confident get-ready clips, outfit reveals and clips of them at work."
+  },
+  {
+   "angle": "Bare face, messy bun, then the beat drops into full glam. Pin the products in comments.",
+   "hashtags": [
+    "#glowup",
+    "#nicolekidman",
+    "#makeuptransformation",
+    "#beforeandafter"
+   ],
+   "heat": 88,
+   "platforms": [
+    "Instagram",
+    "TikTok"
+   ],
+   "sound": "ADÉLA – Nicole Kidman",
+   "title": "The Nicole Kidman glow-up",
+   "why": "No. 6 on the Hot 100 and marked Trending on Instagram. Hard cut from a plain 'before' to a red-carpet hair, makeup and outfit reveal."
+  },
+  {
+   "angle": "Do it with your mom, sister or best friend. The 'me vs. AI version' twist is getting extra shares.",
+   "hashtags": [
+    "#damehombro",
+    "#dancetrend",
+    "#shoulderdance",
+    "#meandai"
+   ],
+   "heat": 85,
+   "platforms": [
+    "TikTok",
+    "Instagram"
+   ],
+   "sound": "Bulin 47 – Dame Hombro",
+   "title": "Dame Hombro shoulder dance",
+   "why": "A freestyle shoulder-bounce dance done solo, with friends, work teams, or as 'me vs. AI' comparisons."
+  },
+  {
+   "angle": "Hallway or street 'runway' in your best fall look, nail the hip pop and the turn, end on a slow-mo smile.",
+   "hashtags": [
+    "#angelofmydreams",
+    "#runwaywalk",
+    "#outfitinspo",
+    "#vsfashionshow"
+   ],
+   "heat": 83,
+   "platforms": [
+    "TikTok",
+    "Instagram"
+   ],
+   "sound": "JADE – Angel of My Dreams",
+   "title": "Angel of My Dreams runway hip pop",
+   "why": "After the Victoria's Secret show, creators recreate Kylie Jenner's hip pop and hesitant runway turn for outfit reveals and dreamy edits."
+  },
+  {
+   "angle": "3 fall outfits, one fan wipe each. Build it in TikTok's own editor, no extra app needed.",
+   "hashtags": [
+    "#transition",
+    "#falloutfits",
+    "#outfitideas",
+    "#ootd"
+   ],
+   "heat": 79,
+   "platforms": [
+    "TikTok"
+   ],
+   "title": "Fan-blade outfit transition",
+   "why": "Overhead shot where a ceiling-fan wipe hides the outfit change. Popular for fall styling videos."
+  },
+  {
+   "angle": "No wedding? Use it for a friend's wedding, a bridal-guest GRWM, or a 'how we met' story.",
+   "hashtags": [
+    "#patientzero",
+    "#taylorswift",
+    "#weddingtok",
+    "#weddingedit"
+   ],
+   "heat": 75,
+   "platforms": [
+    "TikTok"
+   ],
+   "sound": "Taylor Swift – Patient Zero",
+   "title": "Patient Zero wedding edits",
+   "why": "No. 8 on the Hot 100. Couples cut wedding footage into cinematic edits timed to the song's ending."
+  },
+  {
+   "angle": "Photo mode: 'Stop the wedding, but my makeup artist…' then 5 slides of the story. Easy to make, high comment rate.",
+   "hashtags": [
+    "#stopthewedding",
+    "#weddingregrets",
+    "#photomode",
+    "#storytime"
+   ],
+   "heat": 71,
+   "platforms": [
+    "TikTok"
+   ],
+   "title": "\"Stop the wedding, but…\" carousels",
+   "why": "Photo carousels that open with 'Stop the wedding, but…' and then reveal a wedding regret or funny memory."
+  },
+  {
+   "angle": "Ask your mom or your followers' favorite AI: 'Describe my style in one word.' React to each answer.",
+   "hashtags": [
+    "#oneword",
+    "#chatgpt",
+    "#answerinoneword",
+    "#funny"
+   ],
+   "heat": 69,
+   "platforms": [
+    "TikTok"
+   ],
+   "title": "Answer in one word",
+   "why": "Creators make ChatGPT, friends or family answer personal questions in one word, then screen-record the replies."
+  },
+  {
+   "angle": "Girls' night version: each friend walks in slow-mo with one prop. Great for collabs.",
+   "hashtags": [
+    "#prayforme",
+    "#slowmo",
+    "#friendgroup",
+    "#girlsnight"
+   ],
+   "heat": 66,
+   "platforms": [
+    "TikTok"
+   ],
+   "sound": "The Weeknd & Kendrick Lamar – Pray For Me",
+   "title": "Pray For Me slow-mo entrances",
+   "why": "Friends take turns making over-the-top slow-motion entrances in one steady wide shot."
+  },
+  {
+   "angle": "'POV: the outbreak starts at Sephora' as a 3-part series. The cliffhanger brings people back for part 2.",
+   "hashtags": [
+    "#zombie",
+    "#pov",
+    "#storytime",
+    "#part1"
+   ],
+   "heat": 62,
+   "platforms": [
+    "TikTok"
+   ],
+   "title": "Zombie outbreak survival stories",
+   "why": "Animated second-person zombie stories set in familiar places, posted in numbered parts with cliffhangers."
+  },
+  {
+   "angle": "Skip this unless politics is your niche. If you post, use only verified facts and expect heated comments.",
+   "hashtags": [
+    "#midterms2026",
+    "#electionresults",
+    "#vote"
+   ],
+   "heat": 95,
+   "platforms": [
+    "Google"
+   ],
+   "title": "2026 midterm election results",
+   "why": "After Election Day, US searches were led by results for individual races and states. Searches for 'habibi meaning' also spiked after a newly elected senator used the word in a victory speech."
+  },
+  {
+   "angle": "Gaming isn't your niche? A 'gamer girlfriend explains it in 60 seconds' Short can still ride the search spike.",
+   "hashtags": [
+    "#elderscrolls6",
+    "#gaming",
+    "#shorts"
+   ],
+   "heat": 70,
+   "platforms": [
+    "YouTube"
+   ],
+   "title": "Elder Scrolls VI name reveal",
+   "why": "Bethesda's official name reveal is the top trending YouTube video in the US by virality, with about 1.9M views."
+  },
+  {
+   "angle": "Share your own wishlist as a carousel, or a 'gifts under $30 for your bestie' list with links.",
+   "hashtags": [
+    "#giftguide",
+    "#wishlist",
+    "#secretsanta",
+    "#giftideas"
+   ],
+   "heat": 74,
+   "platforms": [
+    "Google",
+    "Instagram"
+   ],
+   "title": "Holiday wishlists & Secret Santa",
+   "why": "Wishlist app GoWish is climbing the US top free chart as people start holiday gift planning."
+  }
+ ],
+ "updatedAt": "2026-11-06T11:20:00Z"
+}
