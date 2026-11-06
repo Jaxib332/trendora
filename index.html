@@ -483,11 +483,11 @@ async function callGemini(prompt,tier,useThinking,signal,onProg){
       try{const j=JSON.parse(line.slice(5));txt+=(j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||"").join("");(onProg||AI_PROG)&&(onProg||AI_PROG)(txt.length)}catch(e){}}}
   return txt;
 }
-async function altModel(){
+async function altModel(preferLite){
   try{const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200",{headers:{"x-goog-api-key":KEY()}});const d=await r.json();
     const cur=MODEL();
     const list=(d.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).map(m=>m.name.replace("models/","")).filter(n=>/^gemini-[\d.]+-flash(-lite)?$/.test(n)&&n!==cur);
-    list.sort((a,b)=>parseFloat(b.split("-")[1])-parseFloat(a.split("-")[1])||(a.includes("lite")-b.includes("lite")));
+    list.sort((a,b)=>(preferLite?(b.includes("lite")-a.includes("lite")):0)||parseFloat(b.split("-")[1])-parseFloat(a.split("-")[1])||(a.includes("lite")-b.includes("lite")));
     return list[0]||null}catch(e){return null}
 }
 async function askAI(prompt,tier,onProg){
@@ -509,7 +509,9 @@ async function askAI(prompt,tier,onProg){
         if(useThinking){useThinking=false;continue}
         if(!triedAlt){triedAlt=true;const alt=await altModel();if(alt){altUsed=alt;store.set("gmodel",alt);if($("#sModel"))$("#sModel").value=alt;continue}}
         last=new Error("Google's Gemini servers are busy or down right now ("+(m.slice(0,140)||"error "+e.status)+"). Try again in a few minutes.");last.code="api";await new Promise(z=>setTimeout(z,2000));continue}
-      if(e.status===429){last=new Error(t("busy")+" ("+m.slice(0,120)+")");await new Promise(z=>setTimeout(z,3000));continue}
+      if(e.status===429){
+        if(!triedAlt){triedAlt=true;const alt=await altModel(true);if(alt){store.set("gmodel",alt);if($("#sModel"))$("#sModel").value=alt;continue}}
+        last=new Error("Your Gemini key has used up its free requests for now. Google says: \""+(m.split("\n")[0].slice(0,220))+"\" Wait a minute (or until tomorrow if it says per day), or turn on billing for the key in Google AI Studio for higher limits.");last.code="quota";throw last}
       last=new Error(/api key|API_KEY|permission/i.test(m)?"Gemini rejected the key. Check it in Settings, or make a new one at aistudio.google.com/apikey.":m);
       last.code=/api key|API_KEY|permission/i.test(m)?"badkey":"api";throw last}
     clearTimeout(timer);
