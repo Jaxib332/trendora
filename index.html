@@ -470,17 +470,38 @@ function trendContext(){
 const DEFAULT_MODEL="gemini-3.8-flash";
 const KEY=()=>store.get("gkey","");
 const MODEL=()=>{const m=store.get("gmodel","");if(!m||/^gemini-(1|2)\./.test(m)){store.set("gmodel",DEFAULT_MODEL);return DEFAULT_MODEL}return m};
+let AI_PROG=null;
+async function callGemini(prompt,tier,useThinking,signal){
+  const gen={temperature:tier==="complex"?0.85:0.6,responseMimeType:"application/json"};
+  if(useThinking)gen.thinkingConfig={thinkingLevel:"low"};
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL())}:streamGenerateContent?alt=sse`,{method:"POST",signal,headers:{"Content-Type":"application/json","x-goog-api-key":KEY()},body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:gen})});
+  if(!r.ok){const d=await r.json().catch(()=>({}));const e=new Error(d.error?.message||("Gemini error "+r.status));e.status=r.status;throw e}
+  const rd=r.body.getReader(),dec=new TextDecoder();let buf="",txt="";
+  for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
+    let i;while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+      if(!line.startsWith("data:"))continue;
+      try{const j=JSON.parse(line.slice(5));txt+=(j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||"").join("");AI_PROG&&AI_PROG(txt.length)}catch(e){}}}
+  return txt;
+}
 async function askAI(prompt,tier){
   if(!KEY()){const e=new Error("nokey");e.code="nokey";throw e}
-  let last;
-  for(let i=0;i<3;i++){
-    let r,d;
-    try{r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(MODEL())}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":KEY()},body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:tier==="complex"?0.85:0.6,responseMimeType:"application/json"}})});d=await r.json().catch(()=>({}))}
-    catch(e){const err=new Error("Couldn't reach Google's Gemini API. Check your internet connection and try again.");err.code="net";throw err}
-    const sug=!r.ok&&/no longer available|not found|not supported/i.test(d.error?.message||"")&&((d.error.message.match(/use (?:models\/)?(gemini-[\w.-]+)/i)||[])[1]);
-    if(sug&&sug!==MODEL()){store.set("gmodel",sug);if($("#sModel"))$("#sModel").value=sug;continue}
-    if(!r.ok){last=new Error(r.status===429?t("busy"):(r.status===400||r.status===403)?"Gemini rejected the key. Check it in Settings, or make a new one at aistudio.google.com/apikey.":(d.error?.message||"Gemini error "+r.status));last.code=r.status===400||r.status===403?"badkey":"api";if(r.status>=500||r.status===429){await new Promise(z=>setTimeout(z,2500));continue}throw last}
-    const txt=(d.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
+  let useThinking=store.get("thinkOK",true),last;
+  for(let i=0;i<4;i++){
+    const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),120000);
+    let txt;
+    try{txt=await callGemini(prompt,tier,useThinking,ctl.signal)}
+    catch(e){
+      clearTimeout(timer);
+      if(e.name==="AbortError"){const err=new Error("Gemini took longer than 2 minutes. Try again, or pick fewer scenes.");err.code="slow";throw err}
+      if(!e.status){const err=new Error("Couldn't reach Google's Gemini API. Check your internet connection and try again.");err.code="net";throw err}
+      const m=e.message||"";
+      const sug=/no longer available|not found|not supported/i.test(m)&&((m.match(/use (?:models\/)?(gemini-[\w.-]+)/i)||[])[1]);
+      if(sug&&sug!==MODEL()){store.set("gmodel",sug);if($("#sModel"))$("#sModel").value=sug;continue}
+      if(useThinking&&e.status===400&&/think/i.test(m)){useThinking=false;store.set("thinkOK",false);continue}
+      if(e.status===429||e.status>=500){last=new Error(e.status===429?t("busy"):"Gemini is having trouble right now. Try again in a minute.");await new Promise(z=>setTimeout(z,2500));continue}
+      last=new Error(/api key|API_KEY|permission/i.test(m)?"Gemini rejected the key. Check it in Settings, or make a new one at aistudio.google.com/apikey.":m);
+      last.code=/api key|API_KEY|permission/i.test(m)?"badkey":"api";throw last}
+    clearTimeout(timer);
     try{return JSON.parse(txt.replace(/```json|```/g,"").trim())}catch(e){last=new Error("Gemini sent an answer that wasn't valid. Tap the button again.")}
   }
   throw last;
@@ -489,7 +510,13 @@ function aiError(e){
   if(e.code==="nokey"||e.code==="badkey")return `<div class="err fixbox"><b>${e.code==="nokey"?"Add your Gemini key to use AI tools.":esc(e.message)}</b><span>Your key is saved only in this browser. Get a free one at aistudio.google.com/apikey.</span><button class="btn sm" onclick="show('prefs')">Open Settings</button></div>`;
   return note(e.message,"err");
 }
-async function runTool(btn,out,fn){btn.disabled=true;out.innerHTML=loader(t("thinking"));try{await fn()}catch(e){out.innerHTML=aiError(e)}finally{btn.disabled=false}}
+async function runTool(btn,out,fn){
+  btn.disabled=true;const t0=Date.now();let chars=0;
+  out.innerHTML=`<div class="card loader"><div class="spin"></div><div><div>${esc(t("thinking"))} <span class="mono small" id="aiTime">0s</span></div><div class="small muted" id="aiInfo">Waiting for Gemini to start…</div><div class="heat" style="margin-top:8px;width:220px;max-width:100%"><i id="aiBar" style="width:3%"></i></div></div></div>`;
+  const tick=setInterval(()=>{const el=$("#aiTime");if(el)el.textContent=Math.round((Date.now()-t0)/1000)+"s"},1000);
+  AI_PROG=n=>{chars=n;const i=$("#aiInfo"),b=$("#aiBar");if(i)i.textContent=`Writing your pack… ${n.toLocaleString()} characters so far`;if(b)b.style.width=Math.min(96,4+n/90)+"%"};
+  try{await fn()}catch(e){out.innerHTML=aiError(e)}finally{clearInterval(tick);AI_PROG=null;btn.disabled=false}
+}
 const copyBtn=(txt,label)=>`<button class="btn ghost sm copy" data-copy="${esc(txt)}">${esc(label||t("copy"))}</button>`;
 
 $("#ckGo").onclick=()=>runTool($("#ckGo"),$("#ckOut"),async()=>{
