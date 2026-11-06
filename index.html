@@ -483,9 +483,16 @@ async function callGemini(prompt,tier,useThinking,signal,onProg){
       try{const j=JSON.parse(line.slice(5));txt+=(j.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||"").join("");(onProg||AI_PROG)&&(onProg||AI_PROG)(txt.length)}catch(e){}}}
   return txt;
 }
+async function altModel(){
+  try{const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200",{headers:{"x-goog-api-key":KEY()}});const d=await r.json();
+    const cur=MODEL();
+    const list=(d.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent")).map(m=>m.name.replace("models/","")).filter(n=>/^gemini-[\d.]+-flash(-lite)?$/.test(n)&&n!==cur);
+    list.sort((a,b)=>parseFloat(b.split("-")[1])-parseFloat(a.split("-")[1])||(a.includes("lite")-b.includes("lite")));
+    return list[0]||null}catch(e){return null}
+}
 async function askAI(prompt,tier,onProg){
   if(!KEY()){const e=new Error("nokey");e.code="nokey";throw e}
-  let useThinking=store.get("thinkLvl","minimal"),last;
+  let useThinking=store.get("thinkLvl","minimal"),last,triedAlt=false,altUsed=null;
   for(let i=0;i<5;i++){
     const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),120000);
     let txt;
@@ -498,7 +505,11 @@ async function askAI(prompt,tier,onProg){
       const sug=/no longer available|not found|not supported/i.test(m)&&((m.match(/use (?:models\/)?(gemini-[\w.-]+)/i)||[])[1]);
       if(sug&&sug!==MODEL()){store.set("gmodel",sug);if($("#sModel"))$("#sModel").value=sug;continue}
       if(useThinking&&e.status===400&&/think/i.test(m)){useThinking=useThinking==="minimal"?"low":false;store.set("thinkLvl",useThinking);continue}
-      if(e.status===429||e.status>=500){last=new Error(e.status===429?t("busy"):"Gemini is having trouble right now. Try again in a minute.");await new Promise(z=>setTimeout(z,2500));continue}
+      if(e.status>=500){
+        if(useThinking){useThinking=false;continue}
+        if(!triedAlt){triedAlt=true;const alt=await altModel();if(alt){altUsed=alt;store.set("gmodel",alt);if($("#sModel"))$("#sModel").value=alt;continue}}
+        last=new Error("Google's Gemini servers are busy or down right now ("+(m.slice(0,140)||"error "+e.status)+"). Try again in a few minutes.");last.code="api";await new Promise(z=>setTimeout(z,2000));continue}
+      if(e.status===429){last=new Error(t("busy")+" ("+m.slice(0,120)+")");await new Promise(z=>setTimeout(z,3000));continue}
       last=new Error(/api key|API_KEY|permission/i.test(m)?"Gemini rejected the key. Check it in Settings, or make a new one at aistudio.google.com/apikey.":m);
       last.code=/api key|API_KEY|permission/i.test(m)?"badkey":"api";throw last}
     clearTimeout(timer);
